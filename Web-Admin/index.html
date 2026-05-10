@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Admin Firebase</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <section class="hero-card">
+        <p class="eyebrow">Blog Admin</p>
+        <h1>Input artikel multi bahasa dengan Firebase</h1>
+        <p class="hero-copy">
+          Satu artikel bisa menyimpan beberapa locale sekaligus. Cover image memakai
+          URL gambar eksternal, lalu metadata artikel disimpan ke Firestore collection
+          <code>posts</code>.
+        </p>
+      </section>
+
+      <main class="page-content">
+        <nav class="top-nav" aria-label="Menu admin">
+          <button class="nav-tab active" type="button" data-view-target="content" aria-selected="true">Content</button>
+          <button class="nav-tab" type="button" data-view-target="label" aria-selected="false">Label</button>
+          <button class="nav-tab" type="button" data-view-target="locale" aria-selected="false">Locale Bahasa</button>
+        </nav>
+
+        <section class="view-stack">
+          <section class="admin-view active" data-view="content">
+            <div class="view-grid">
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2 id="post-form-title">Artikel Baru</h2>
+                  <p id="post-form-description">
+                    Field terjemahan akan muncul otomatis berdasarkan bahasa yang Anda
+                    tambahkan dari menu locale.
+                  </p>
+                </div>
+
+                <form id="post-form" class="post-form">
+                  <label>
+                    <span>Cover image URL</span>
+                    <input
+                      id="coverImage"
+                      name="coverImage"
+                      type="url"
+                      placeholder="https://example.com/cover.jpg"
+                    />
+                  </label>
+
+                  <div id="image-preview-wrapper" class="image-preview hidden">
+                    <img id="image-preview" alt="Preview cover" />
+                  </div>
+
+                  <label>
+                    <span>Default locale</span>
+                    <select id="post-default-locale" name="postDefaultLocale"></select>
+                  </label>
+
+                  <div class="content-mode-group">
+                    <span class="field-label">Format konten</span>
+                    <div class="toggle-group" role="radiogroup" aria-label="Format konten">
+                      <label class="toggle-option">
+                        <input
+                          type="radio"
+                          name="contentFormat"
+                          value="text"
+                          checked
+                        />
+                        <span>Text</span>
+                      </label>
+
+                      <label class="toggle-option">
+                        <input
+                          type="radio"
+                          name="contentFormat"
+                          value="html"
+                        />
+                        <span>HTML</span>
+                      </label>
+                    </div>
+                    <p id="content-format-hint" class="field-hint">
+                      Mode text akan menyimpan isi artikel sebagai plain text biasa.
+                    </p>
+                  </div>
+
+                  <div class="locale-section">
+                    <div class="selector-head">
+                      <span class="field-label">Konten per bahasa</span>
+                      <p class="field-hint">Title dan content akan dibuat untuk setiap locale aktif.</p>
+                    </div>
+                    <div id="post-locale-fields" class="locale-grid"></div>
+                    <p id="post-locale-empty" class="field-hint">
+                      Belum ada bahasa. Tambahkan locale terlebih dahulu.
+                    </p>
+                  </div>
+
+                  <div class="label-selector">
+                    <div class="selector-head">
+                      <span class="field-label">Label artikel</span>
+                      <p class="field-hint">Pilih satu atau lebih label untuk artikel ini.</p>
+                    </div>
+                    <div id="post-label-options" class="label-option-list"></div>
+                    <p id="post-label-empty" class="field-hint">
+                      Belum ada label. Tambahkan label dari menu label.
+                    </p>
+                  </div>
+
+                  <p id="status-message" class="status"></p>
+
+                  <div class="form-actions">
+                    <button id="dummy-post-button" class="secondary-button" type="button">Generate Dummy</button>
+                    <button id="cancel-edit-button" class="secondary-button hidden" type="button">Batal Edit</button>
+                    <button id="submit-button" type="submit">Simpan Artikel</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Artikel Tersimpan</h2>
+                  <p>Preview ini membaca locale utama dari setiap artikel.</p>
+                </div>
+
+                <div id="post-list" class="post-list"></div>
+                <p id="empty-state" class="empty-state">Memuat artikel...</p>
+              </section>
+            </div>
+          </section>
+
+          <section class="admin-view" data-view="label" hidden>
+            <div class="view-grid">
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2 id="label-form-title">Tambah Label</h2>
+                  <p id="label-form-description">Nama label akan mengikuti semua locale yang aktif.</p>
+                </div>
+
+                <form id="label-form" class="post-form">
+                  <label>
+                    <span>Default locale label</span>
+                    <select id="label-default-locale" name="labelDefaultLocale"></select>
+                  </label>
+
+                  <div class="locale-section">
+                    <div class="selector-head">
+                      <span class="field-label">Nama label per bahasa</span>
+                      <p class="field-hint">Isi satu atau lebih locale. Locale utama wajib terisi.</p>
+                    </div>
+                    <div id="label-locale-fields" class="locale-grid locale-grid-compact"></div>
+                    <p id="label-locale-empty" class="field-hint">
+                      Belum ada bahasa. Tambahkan locale terlebih dahulu.
+                    </p>
+                  </div>
+
+                  <label>
+                    <span>URL gambar label</span>
+                    <input
+                      id="labelImage"
+                      name="labelImage"
+                      type="url"
+                      placeholder="https://example.com/label.png"
+                    />
+                  </label>
+
+                  <div id="label-image-preview-wrapper" class="image-preview compact-preview hidden">
+                    <img id="label-image-preview" alt="Preview label" />
+                  </div>
+
+                  <p id="label-status-message" class="status"></p>
+
+                  <div class="form-actions">
+                    <button id="dummy-label-button" class="secondary-button" type="button">Isi Dummy</button>
+                    <button id="cancel-label-edit-button" class="secondary-button hidden" type="button">Batal Edit</button>
+                    <button id="label-submit-button" type="submit">Simpan Label</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Label Tersimpan</h2>
+                  <p>Nama label akan menyesuaikan locale yang dipakai artikel.</p>
+                </div>
+
+                <div id="saved-label-list" class="saved-label-list"></div>
+                <p id="label-empty-state" class="empty-state">Memuat label...</p>
+              </section>
+            </div>
+          </section>
+
+          <section class="admin-view" data-view="locale" hidden>
+            <div class="view-grid view-grid-narrow">
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2 id="locale-form-title">Tambah Bahasa</h2>
+                  <p id="locale-form-description">Locale baru yang ditambahkan di sini akan langsung muncul di form artikel dan label.</p>
+                </div>
+
+                <form id="locale-form" class="post-form">
+                  <label>
+                    <span>Kode locale</span>
+                    <input
+                      id="locale-code"
+                      name="localeCode"
+                      type="text"
+                      placeholder="id, en, fr, pt-br"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span>Nama bahasa</span>
+                    <input
+                      id="locale-name"
+                      name="localeName"
+                      type="text"
+                      placeholder="Indonesia"
+                      required
+                    />
+                  </label>
+
+                  <p id="locale-status-message" class="status"></p>
+
+                  <div class="form-actions">
+                    <button id="dummy-locale-button" class="secondary-button" type="button">Isi Dummy</button>
+                    <button id="cancel-locale-edit-button" class="secondary-button hidden" type="button">Batal Edit</button>
+                    <button id="locale-submit-button" type="submit">Simpan Bahasa</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Bahasa Tersimpan</h2>
+                  <p>Daftar locale aktif untuk konten dan label.</p>
+                </div>
+
+                <div id="saved-locale-list" class="saved-locale-list"></div>
+                <p id="locale-empty-state" class="empty-state">Memuat bahasa...</p>
+              </section>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
