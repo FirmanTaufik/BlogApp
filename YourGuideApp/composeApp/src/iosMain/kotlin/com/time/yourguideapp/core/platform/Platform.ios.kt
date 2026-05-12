@@ -1,4 +1,4 @@
-package com.time.yourguideapp
+package com.time.yourguideapp.core.platform
 
 import platform.UIKit.UIDevice
 

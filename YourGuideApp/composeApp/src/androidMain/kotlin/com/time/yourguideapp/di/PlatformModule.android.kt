@@ -1,7 +1,7 @@
 package com.time.yourguideapp.di
 
-import com.time.yourguideapp.Platform
-import com.time.yourguideapp.getPlatform
+import com.time.yourguideapp.core.platform.Platform
+import com.time.yourguideapp.core.platform.getPlatform
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

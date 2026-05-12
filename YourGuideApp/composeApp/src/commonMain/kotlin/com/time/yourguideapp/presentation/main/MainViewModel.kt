@@ -1,8 +1,11 @@
-package com.time.yourguideapp
+package com.time.yourguideapp.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.time.yourguideapp.data.repository.MainRepository
+import com.time.yourguideapp.presentation.state.UIState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -12,23 +15,23 @@ class MainViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow<UIState>(UIState.Loading)
     val state = _state.asStateFlow()
+    private var observeJob: Job? = null
 
     init {
         loadContent()
     }
 
     fun refresh() {
-        viewModelScope.launch {
-            _state.value = UIState.Loading
-            delay(1500)
-            _state.value = repository.getHomeState()
-        }
+        loadContent()
     }
 
     fun loadContent() {
-        viewModelScope.launch {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
             _state.value = UIState.Loading
-            _state.value = repository.getHomeState()
+            repository.observeHomeState().collect { state ->
+                _state.value = state
+            }
         }
     }
 }

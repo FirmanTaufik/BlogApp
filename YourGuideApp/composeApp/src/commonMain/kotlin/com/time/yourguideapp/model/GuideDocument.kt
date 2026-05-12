@@ -1,4 +1,4 @@
-package com.time.yourguideapp
+package com.time.yourguideapp.model
 
 import kotlinx.serialization.Serializable
 

@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "752154779144",
+    "firebase_url": "https://vbcash88-2ec77-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "vbcash88-2ec77",
+    "storage_bucket": "vbcash88-2ec77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752154779144:android:a331d165f16fff9766bbbd",
+        "android_client_info": {
+          "package_name": "com.perpussapp.perpusapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752154779144:android:7f61667d342078e366bbbd",
+        "android_client_info": {
+          "package_name": "com.time.yourguideapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752154779144:android:e041ad0947e012f866bbbd",
+        "android_client_info": {
+          "package_name": "com.vbcash88.VBcash88app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
