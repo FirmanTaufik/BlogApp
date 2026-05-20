@@ -1,7 +1,11 @@
 TEAM_ID=
 
 PRODUCT_NAME=YourGuideApp
-PRODUCT_BUNDLE_IDENTIFIER=com.time.yourguideapp.YourGuideApp$(TEAM_ID)
+PRODUCT_BUNDLE_IDENTIFIER=com.time.yourguideapp
 
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0
+
+GOOGLE_WEB_CLIENT_ID=752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=752154779144-idta30g6r7qltbv0ai5lb8ah5cqv06op.apps.googleusercontent.com
+GOOGLE_IOS_REVERSED_CLIENT_ID=com.googleusercontent.apps.752154779144-idta30g6r7qltbv0ai5lb8ah5cqv06op

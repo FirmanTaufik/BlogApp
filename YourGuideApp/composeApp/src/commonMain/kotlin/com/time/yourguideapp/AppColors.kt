@@ -8,4 +8,5 @@ object AppColors {
     val blue123060 = Color(0xFF123060)
     val black = Color.Black
     val white = Color.White
+    val cardColor = Color(0xFFFAFAFA)
 }

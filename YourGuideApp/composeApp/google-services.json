@@ -13,7 +13,20 @@
           "package_name": "com.perpussapp.perpusapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "752154779144-jg6fjtg3ftu72shc8fh4rj32ivir6lno.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.perpussapp.perpusapp",
+            "certificate_hash": "a2cd3d20bcc08771abcd2b3fa2a3243d3f094621"
+          }
+        },
+        {
+          "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
@@ -21,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "752154779144-idta30g6r7qltbv0ai5lb8ah5cqv06op.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.time.yourguideapp"
+              }
+            }
+          ]
         }
       }
     },
@@ -32,7 +57,20 @@
           "package_name": "com.time.yourguideapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "752154779144-hihm1onadr6cafajl9b15emc6p56i9ka.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.time.yourguideapp",
+            "certificate_hash": "a2cd3d20bcc08771abcd2b3fa2a3243d3f094621"
+          }
+        },
+        {
+          "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
@@ -40,7 +78,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "752154779144-idta30g6r7qltbv0ai5lb8ah5cqv06op.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.time.yourguideapp"
+              }
+            }
+          ]
         }
       }
     },
@@ -51,7 +101,12 @@
           "package_name": "com.vbcash88.VBcash88app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCxV3dLnGKczpfGCLRHKQpPS6UyqgnVCqA"
@@ -59,7 +114,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752154779144-ief6f9j0plu3dk58jq4nmse8to6ndpdp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "752154779144-idta30g6r7qltbv0ai5lb8ah5cqv06op.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.time.yourguideapp"
+              }
+            }
+          ]
         }
       }
     }

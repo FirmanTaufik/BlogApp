@@ -60,7 +60,7 @@ data object RootScreen : Screen {
     override fun Content() {
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Profile, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
         ) {
             CurrentTab()
         }
@@ -190,7 +190,7 @@ private fun RootScreenPreview() {
     MaterialTheme {
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Profile, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
         ) {
             Text("Home")
         }

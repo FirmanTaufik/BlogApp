@@ -52,6 +52,10 @@ kotlin {
             implementation(libs.koin.compose.viewModel)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.tabNavigator)
+            implementation("network.chaintech:compose-multiplatform-media-player:1.0.53")
+            implementation("io.github.mirzemehdi:kmpauth-google:2.5.0-alpha01") //Google One Tap Sign-In
+            implementation("io.github.mirzemehdi:kmpauth-firebase:2.5.0-alpha01") //Integrated Authentications with Firebase
+            implementation("io.github.mirzemehdi:kmpauth-uihelper:2.5.0-alpha01")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

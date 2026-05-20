@@ -3,6 +3,8 @@ package com.time.yourguideapp.root
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -22,6 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import chaintech.videoplayer.host.MediaPlayerHost
+import chaintech.videoplayer.ui.reel.ReelsPlayerComposable
+import chaintech.videoplayer.ui.youtube.YouTubePlayerComposable
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.presentation.detail.DetailScreen
@@ -37,7 +42,7 @@ sealed class MainTab(
             val icon = rememberVectorPainter(
                 image = when (this) {
                     Home -> Icons.Outlined.Home
-                    Profile -> Icons.Outlined.Explore
+                    Explore -> Icons.Outlined.Explore
                     Category -> Icons.Outlined.Menu
                     else -> Icons.Outlined.Save
                 }
@@ -69,17 +74,20 @@ sealed class MainTab(
         }
     }
 
-    data object Profile : MainTab(index = 1u, title = "Profile") {
+    data object Explore : MainTab(index = 1u, title = "Explore") {
         @Composable
         override fun Content() {
+            val playerHost = remember { MediaPlayerHost(mediaUrl = "QFxN2oDKk0E") }
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.headlineSmall,
+
+                YouTubePlayerComposable(
+                    modifier = Modifier.wrapContentSize(),
+                    playerHost = playerHost
                 )
             }
         }
