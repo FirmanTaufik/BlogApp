@@ -95,6 +95,7 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+    androidTestImplementation(platform(libs.firebase.bom))
 }
 
 if (file("google-services.json").exists()) {
