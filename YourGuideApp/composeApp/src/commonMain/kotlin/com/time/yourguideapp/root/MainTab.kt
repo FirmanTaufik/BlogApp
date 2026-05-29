@@ -3,17 +3,12 @@ package com.time.yourguideapp.root
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,10 +20,10 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import chaintech.videoplayer.host.MediaPlayerHost
-import chaintech.videoplayer.ui.reel.ReelsPlayerComposable
 import chaintech.videoplayer.ui.youtube.YouTubePlayerComposable
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
+import com.time.yourguideapp.presentation.category.CategoryScreen
 import com.time.yourguideapp.presentation.detail.DetailScreen
 import com.time.yourguideapp.presentation.home.HomeScreen
 
@@ -67,9 +62,16 @@ sealed class MainTab(
             HomeScreen(
                 state = state,
                 onReload = viewModel::refresh,
-                onOpenDetail = { text ->
-                    rootNavigator.push(DetailScreen(text))
+                onOpenDetail = { data, lables ->
+                    rootNavigator.push(DetailScreen(data, lables))
                 },
+                onOpenCategory = { label, list ->
+                    rootNavigator.push(CategoryScreen(label, list, onClickBack = {
+                        rootNavigator.pop()
+                    }, onOpenDetail = { data, labels ->
+                        rootNavigator.push(DetailScreen(data, labels))
+                    }))
+                }
             )
         }
     }

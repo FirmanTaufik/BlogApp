@@ -58,6 +58,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
 import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mmk.kmpauth.uihelper.apple.AppleSignInButton
@@ -85,7 +86,7 @@ fun AuthScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var resultErrorMessage by remember { mutableStateOf<String?>(null) }
-    var signedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
+
 
     val googleAuthProviderResult = remember {
         if (GoogleSignInConfig.isConfigured) {
@@ -117,7 +118,32 @@ fun AuthScreen(
             ContentAuth(
                 Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
+                googleAuthProviderResult = googleAuthProviderResult,
+                googleConfigurationErrorMessage = configurationErrorMessage,
+                isGoogleLoginLoading = isLoading,
+                onGoogleLoginStarted = {
+                    isLoading = true
+                    resultErrorMessage = null
+                },
+                onGoogleLoginResult = { result ->
+                    isLoading = false
+                    result
+                        .onSuccess { user ->
+                            if (user == null) {
+                                resultErrorMessage = "Login Google berhasil, tapi Firebase user kosong."
+                            } else {
+                                resultErrorMessage = null
+                                onLoginSuccess(user)
+                            }
+                        }
+                        .onFailure { throwable ->
+                            resultErrorMessage = throwable.toGoogleLoginMessage()
+                        }
+                },
+                onGoogleLoginConfigurationError = {
+                    resultErrorMessage = configurationErrorMessage
+                }
             )
         }
     }
@@ -165,7 +191,15 @@ private fun ContentHeader() {
 }
 
 @Composable
-private fun ContentAuth(modifier: Modifier = Modifier) {
+private fun ContentAuth(
+    modifier: Modifier = Modifier,
+    googleAuthProviderResult: Result<GoogleAuthProvider>,
+    googleConfigurationErrorMessage: String?,
+    isGoogleLoginLoading: Boolean,
+    onGoogleLoginStarted: () -> Unit,
+    onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
+    onGoogleLoginConfigurationError: () -> Unit,
+) {
     val tabsList = listOf(" Log in"," Sign up")
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(1) }
     Card(
@@ -203,19 +237,53 @@ private fun ContentAuth(modifier: Modifier = Modifier) {
 
                 }
                 HorizontalSpacer(10)
-                GoogleSignInButton (text = "Google",
-                    modifier = Modifier
-                        .glassmorphism()
-                        .weight(1f)
-                        .height(50.dp),
-                    shape = RoundedCornerShape(50)) {
-
+                if (googleAuthProviderResult.isSuccess) {
+                    GoogleButtonUiContainerFirebase(
+                        linkAccount = false,
+                        filterByAuthorizedAccounts = false,
+                        onResult = onGoogleLoginResult
+                    ) {
+                        GoogleSignInButton (text = "Google",
+                            modifier = Modifier
+                                .glassmorphism()
+                                .weight(1f)
+                                .height(50.dp),
+                            shape = RoundedCornerShape(50)) {
+                            if (!isGoogleLoginLoading) {
+                                onGoogleLoginStarted()
+                                this.onClick()
+                            }
+                        }
+                    }
+                } else {
+                    GoogleSignInButton (text = "Google",
+                        modifier = Modifier
+                            .glassmorphism()
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(50)) {
+                        if (googleConfigurationErrorMessage != null) {
+                            onGoogleLoginConfigurationError()
+                        }
+                    }
                 }
             }
 
         }
 
 
+    }
+}
+
+private fun Throwable.toGoogleLoginMessage(): String {
+    val rawMessage = message.orEmpty()
+    return when {
+        rawMessage.contains("idtoken is null", ignoreCase = true) ||
+            rawMessage.contains("id token is null", ignoreCase = true) -> {
+            "Login Google gagal: idToken kosong. Di iOS, cek GIDServerClientID, GIDClientID, URL scheme REVERSED_CLIENT_ID, dan callback GIDSignIn.handle(url)."
+        }
+        rawMessage.isNotBlank() -> rawMessage
+        else -> "Login Google gagal: ${this::class.simpleName ?: "Unknown error"}."
     }
 }
 

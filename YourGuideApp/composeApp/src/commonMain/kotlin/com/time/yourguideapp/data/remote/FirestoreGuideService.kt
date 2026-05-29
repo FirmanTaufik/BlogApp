@@ -2,18 +2,24 @@ package com.time.yourguideapp.data.remote
 
 import com.time.yourguideapp.model.GuideDocument
 import com.time.yourguideapp.model.Label
+import com.time.yourguideapp.model.Locales
+import com.time.yourguideapp.model.Posts
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class FirestoreGuideService {
-    suspend fun getFeaturedGuide(): GuideDocument {
+     fun getFeaturedGuide(): Flow<List<Posts>> {
         return Firebase.firestore
             .collection("posts")
-            .document("ZHa3Wxl7K6P3od3Ygb5e")
-            .get()
-            .data(GuideDocument.serializer())
+            .snapshots
+            .map {
+                it.documents.map { doc ->
+                    doc.data(Posts.serializer())
+                        .copy(idPost = doc.id)
+                }
+            }
     }
 
     fun observeLabels(): Flow<List<Label>> {
@@ -22,7 +28,23 @@ class FirestoreGuideService {
             .snapshots
             .map { snapshot ->
                 snapshot.documents.map { document ->
-                    document.data(Label.serializer())
+                    document.data(Label.serializer()).copy(
+                        idLabel = document.id
+                    )
+                }
+            }
+    }
+
+    fun getObserverLocales(): Flow<List<Locales>> {
+        return Firebase.firestore
+            .collection("locales")
+            .snapshots
+            .map { snapshot ->
+                snapshot.documents.map { document ->
+                    document.data(Locales.serializer())
+                        .copy(
+                            idLocales = document.id
+                        )
                 }
             }
     }

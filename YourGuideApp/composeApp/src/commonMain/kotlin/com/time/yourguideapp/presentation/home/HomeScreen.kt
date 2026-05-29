@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +29,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
+import com.time.yourguideapp.model.Posts
+import com.time.yourguideapp.presentation.category.CategoryScreen
 import com.time.yourguideapp.presentation.component.BannerSlider
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import com.time.yourguideapp.presentation.state.UIState
@@ -40,9 +47,11 @@ import com.time.yourguideapp.presentation.state.UIState
 fun HomeScreen(
     state: UIState,
     onReload: () -> Unit,
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (Posts, List<Label>) -> Unit,
+    onOpenCategory:  (Label, List<Posts>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize() ,
@@ -56,7 +65,9 @@ fun HomeScreen(
 
             is UIState.Success<*> -> {
                 val data = state.data as HomeData
-
+                LaunchedEffect(data){
+                    print("Hallo this loge ${data.posts.size}")
+                }
                 Column {
 
 
@@ -73,7 +84,11 @@ fun HomeScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 items(data.labels) { label ->
-                                    Box(modifier= Modifier.padding(horizontal = 10.dp)){
+                                    Box(modifier= Modifier.padding(horizontal = 10.dp)
+                                        .clickable{
+                                            onOpenCategory(label,data.posts)
+                                        }
+                                    ){
                                         Row(
                                             modifier = Modifier
                                                 .glassmorphism(CircleShape,  backgroundColor = Color.White.copy(alpha = 0.50f))
@@ -92,7 +107,7 @@ fun HomeScreen(
                                                 )
                                             }
                                             Text(
-                                                text = label.names.id,
+                                                text = label.getCurrentLanguage(),
                                                 color = AppColors.blue123060,
                                             )
                                         }
@@ -102,14 +117,19 @@ fun HomeScreen(
                             VerticalSpacer(20)
                         }
 
-                        items(10){
-                            PostItem(Modifier.fillMaxWidth()
+
+                        itemsIndexed(data.posts){ index, item ->
+                            val label = data.labels.find { it.idLabel == item.labelIds.first()  }?.getCurrentLanguage() ?: ""
+                            AppLogger.d (tag = "HomeTAG"){ "Ini Label $label ${item.labelIds.first()} ${data.labels.size}" }
+                            PostItem(item, label, Modifier.fillMaxWidth()
                                 .padding(vertical = 10.dp)
                                 .clickable{
-                                    onOpenDetail("ddd")
+                                    onOpenDetail(item, data.labels)
                                 }
                             )
                         }
+
+
                     }
                 }
 
@@ -149,11 +169,15 @@ fun HomeViewPreview() {
             HomeScreen(
                 state = UIState.Success(
                     data = HomeData(
-                        labels = list
+                        labels = list,
+                        emptyList(), emptyList()
                     )
                 ),
                 onReload = {},
-                onOpenDetail = {},
+                onOpenDetail ={ data, lablel ->
+
+                },
+                onOpenCategory = {lable, post-> },
                 modifier = Modifier
             )
         }

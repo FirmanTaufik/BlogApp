@@ -8,6 +8,7 @@ import FirebaseCore
 #if canImport(GoogleSignIn)
 import GoogleSignIn
 #endif
+import ComposeApp
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
@@ -53,7 +54,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct iOSApp: App {
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    init(){
+        #if DEBUG
+        AppLogger.shared.setUp(isDebug: true)
+        #else
+        AppLogger.shared.setUp(isDebug: false)
+        #endif
+    }
 
     var body: some Scene {
         WindowGroup {

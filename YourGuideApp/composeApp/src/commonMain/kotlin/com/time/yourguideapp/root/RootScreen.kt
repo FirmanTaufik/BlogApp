@@ -31,29 +31,42 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
+import com.time.yourguideapp.presentation.profile.ProfileScreen
+import org.koin.core.instance.InstanceFactory
 
 data object RootScreen : Screen {
     @Composable
@@ -74,24 +87,30 @@ private fun RootContent(
     tabs: List<Tab>,
     content: @Composable () -> Unit,
 ) {
+
+    var showDialogConfirmation by remember { mutableStateOf(false) }
+    //val rootNavigator = LocalRootNavigator.current
+
     TabNavigator(initialTab) {
         Scaffold(
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-
                         containerColor = Color.Transparent,
-
                     ),
                     title = {
-                        Text("Home", color = AppColors.blue123060)
+                        Column (verticalArrangement = Arrangement.Center, ){
+                            Text("Abdulah Bin Jaenudin",color = AppColors.blue123060,
+                                style = MaterialTheme.typography.titleMedium)
+                            Text("abdulah@masil.com",color = AppColors.blue123060.copy(alpha = 0.8f),  style = MaterialTheme.typography.bodySmall)
+                        }
                     },
 
                     navigationIcon = {
 
                         IconButton(
                             onClick = {
-                                // back
+                              //  rootNavigator.push(ProfileScreen())
                             },
                             modifier = Modifier.glassmorphism(CircleShape, backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
@@ -104,6 +123,7 @@ private fun RootContent(
                     },
 
                     actions = {
+                        HorizontalSpacer(10)
 
                         IconButton(
                             onClick = {
@@ -117,6 +137,24 @@ private fun RootContent(
                                 tint = AppColors.blue123060
                             )
                         }
+
+                        HorizontalSpacer(10)
+
+                        IconButton(
+                            onClick = {
+                                showDialogConfirmation = true
+                            },
+                            modifier = Modifier.glassmorphism(CircleShape,   backgroundColor = Color.White.copy(alpha = 0.30f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Logout,
+                                contentDescription = null,
+                                tint = AppColors.blue123060
+                            )
+                        }
+
+                        HorizontalSpacer(10)
+
                     }
                 )
             }
@@ -135,6 +173,33 @@ private fun RootContent(
                }
             }
         }
+    }
+
+    if (showDialogConfirmation) {
+        AlertDialog(
+            modifier = Modifier.glassmorphism(),
+            containerColor = Color.Transparent,
+            onDismissRequest = {
+            showDialogConfirmation = false
+        }, title = {
+            Text("Confirmation", color = AppColors.white)
+        }, text = {
+            Text(text = "Are you sure want to logout?", color = AppColors.white.copy(alpha = 0.8f))
+        }, confirmButton = {
+                Button(onClick = {
+                    showDialogConfirmation = false
+                }, modifier = Modifier.glassmorphism(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)){
+                    Text("Yes")
+                }
+        }, dismissButton = {
+            Button(onClick = {
+                showDialogConfirmation = false
+            }, modifier = Modifier.glassmorphism(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)){
+                Text("No")
+            }
+        })
     }
 }
 

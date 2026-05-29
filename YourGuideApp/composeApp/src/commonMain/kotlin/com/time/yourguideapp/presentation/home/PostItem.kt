@@ -37,11 +37,14 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.helper.glassmorphism
+import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 
 @Composable
-fun PostItem(modifier: Modifier) {
+fun PostItem(posts: Posts, label :String,modifier: Modifier) {
+    val title = posts.getCurrentLocaleData().title
+    val description = posts.getCurrentLocaleData().content
     Row(
         modifier = modifier.fillMaxWidth()
             .padding(10.dp)
@@ -54,7 +57,7 @@ fun PostItem(modifier: Modifier) {
         Box(modifier = Modifier.size(150.dp)) {
 
             AsyncImage(
-                model = "https://picsum.photos/seed/blog-label-tech/512/512",
+                model = posts.coverImageUrl,
                 contentDescription = null,
                 modifier = Modifier.size(140.dp)
                     .align(alignment = Alignment.Center)
@@ -80,7 +83,7 @@ fun PostItem(modifier: Modifier) {
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
                     Text(
-                        text = "Teknologiaa",
+                        text =  label,
                         color = AppColors.blue4789d7,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
@@ -100,7 +103,7 @@ fun PostItem(modifier: Modifier) {
             }
 
             Text(
-                text = "10 Thing I Wish have to bla blssssa bla",
+                text = title,
                 color = AppColors.blue123060,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
@@ -112,7 +115,7 @@ fun PostItem(modifier: Modifier) {
             VerticalSpacer(5)
 
             Text(
-                text = "10 Thing I Wish have to bla blssssa sasasa sadakdak dmakdmakdmkdakmdakmdkadamkdmakdabla",
+                text = description,
                 color = AppColors.blue123060,
                 fontSize = 13.sp,
                 maxLines = 3,
@@ -131,7 +134,7 @@ fun PostItem(modifier: Modifier) {
 private fun PostItemPreview() {
     MaterialTheme {
         Box(contentAlignment = Alignment.Center) {
-            PostItem(Modifier)
+            //PostItem( Modifier)
         }
 
     }

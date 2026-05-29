@@ -46,22 +46,21 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
         modules(appModule, platformModule)
     }), content = {
         MaterialTheme {
-            AuthScreen()
             val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
 
-          //  if (currentUser == null) {
-               // LoginScreen(modifier = Modifier)
-//            } else {
-//                val viewModel = koinViewModel<MainViewModel>()
-//
-//                CompositionLocalProvider(LocalMainViewModel provides viewModel) {
-//                    Navigator(screen = RootScreen) { navigator ->
-//                        CompositionLocalProvider(LocalRootNavigator provides navigator) {
-//                            CurrentScreen()
-//                        }
-//                    }
-//                }
-//            }
+            if (currentUser == null) {
+                AuthScreen(modifier = Modifier)
+            } else {
+                val viewModel = koinViewModel<MainViewModel>()
+
+                CompositionLocalProvider(LocalMainViewModel provides viewModel) {
+                    Navigator(screen = RootScreen) { navigator ->
+                        CompositionLocalProvider(LocalRootNavigator provides navigator) {
+                            CurrentScreen()
+                        }
+                    }
+                }
+            }
         }
     })
 }

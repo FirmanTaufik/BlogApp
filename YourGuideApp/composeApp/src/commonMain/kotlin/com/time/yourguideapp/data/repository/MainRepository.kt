@@ -2,10 +2,13 @@ package com.time.yourguideapp.data.repository
 
 import com.time.yourguideapp.core.platform.Platform
 import com.time.yourguideapp.data.remote.FirestoreGuideService
+import com.time.yourguideapp.model.Label
+import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.state.UIState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class MainRepository(
@@ -14,13 +17,15 @@ class MainRepository(
 ) {
 
     fun observeHomeState(): Flow<UIState> {
-        return firestoreService.observeLabels()
-            .map { labels ->
-                UIState.Success(
-                    HomeData(labels = labels)
+        return combine(
+            firestoreService.getFeaturedGuide(),
+            firestoreService.observeLabels(),
+            firestoreService.getObserverLocales()
+        ) { posts, labels, locales ->
+            UIState.Success(
+                    HomeData(labels = labels, posts, locales)
                 ) as UIState
-            }
-            .catch { error ->
+        }.catch { error ->
                 emit(
                     UIState.Error(
                         message = buildString {
@@ -33,4 +38,17 @@ class MainRepository(
                 )
             }
     }
+
+
+    fun getListByLabel(label : Label, listPost : List<Posts>) : List<Posts>{
+        val list = arrayListOf<Posts>()
+
+        listPost.forEach { it
+            if (it.labelIds.contains(label.idLabel)){
+                list.add(it)
+            }
+        }
+        return list
+    }
+
 }
