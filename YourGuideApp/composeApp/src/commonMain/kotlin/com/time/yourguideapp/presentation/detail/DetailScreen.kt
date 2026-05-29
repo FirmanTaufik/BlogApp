@@ -183,7 +183,7 @@ data class DetailScreen(
                                 contentPadding = PaddingValues(5.dp)
                             ) {
                                 items(2) {
-                                    CustomItemBar("", rememberVectorPainter(Icons.Outlined.Map)) {
+                                    CustomItemBar(rememberVectorPainter(Icons.Outlined.Map)) {
 
                                     }
                                 }
@@ -194,7 +194,7 @@ data class DetailScreen(
                                 .glassmorphism(CircleShape, widthBorder = 1, backgroundColor = Color.White.copy(alpha = 0.95f) ),
                             ){
 
-                                CustomItemBar("", rememberVectorPainter(Icons.Outlined.ArrowForwardIos)) {
+                                CustomItemBar(rememberVectorPainter(Icons.Outlined.ArrowForwardIos)) {
 
                                 }
                             }

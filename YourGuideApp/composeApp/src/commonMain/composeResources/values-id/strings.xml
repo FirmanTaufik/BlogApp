@@ -1,0 +1,129 @@
+<resources>
+    <string name="app_name">YourGuide</string>
+    <string name="default_display_name">Wisatawan</string>
+    <string name="no_email_connected">Belum ada email terhubung</string>
+
+    <string name="nav_home">Beranda</string>
+    <string name="nav_explore">Eksplorasi</string>
+    <string name="nav_weather">Cuaca</string>
+    <string name="nav_currency">Kurs Dolar</string>
+    <string name="nav_loves">Suka</string>
+
+    <string name="profile_title">Profil</string>
+    <string name="profile_language_label">Bahasa</string>
+    <string name="choose_language">Pilih bahasa</string>
+    <string name="close">Tutup</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="language_english">English</string>
+
+    <string name="section_app">Aplikasi</string>
+    <string name="section_account">Akun</string>
+    <string name="app_info_title">Info Aplikasi</string>
+    <string name="app_info_subtitle">Nama, versi, dan platform</string>
+    <string name="share_app_title">Bagikan Aplikasi</string>
+    <string name="share_app_subtitle">Bagikan aplikasi ini ke orang lain</string>
+    <string name="about_title">Tentang</string>
+    <string name="about_subtitle">Apa isi aplikasi ini</string>
+    <string name="privacy_title">Kebijakan Privasi</string>
+    <string name="privacy_subtitle">Bagaimana data Anda diproses</string>
+    <string name="logout_title">Keluar</string>
+    <string name="logout_subtitle">Keluar dari akun ini</string>
+
+    <string name="app_info_dialog_title">Info Aplikasi</string>
+    <string name="app_info_name">Nama</string>
+    <string name="app_info_version">Versi</string>
+    <string name="app_info_platform">Platform</string>
+    <string name="about_dialog_title">Tentang</string>
+    <string name="about_dialog_body">YourGuide membantu wisatawan menjelajah panduan, cek cuaca, dan membandingkan kurs dolar dalam satu tempat.</string>
+    <string name="privacy_dialog_title">Kebijakan Privasi</string>
+    <string name="privacy_intro">Kebijakan ini menjelaskan bagaimana YourGuide menangani informasi di dalam aplikasi.</string>
+    <string name="privacy_section_info_title">Informasi yang kami gunakan</string>
+    <string name="privacy_section_info_body">Kami dapat menggunakan detail profil dari proses masuk, item yang disimpan, preferensi bahasa, aktivitas pencarian di dalam aplikasi, dan konten yang Anda pilih untuk dilihat.</string>
+    <string name="privacy_section_use_title">Cara kami menggunakannya</string>
+    <string name="privacy_section_use_body">Kami menggunakan informasi ini untuk masuk ke akun, mempersonalisasi tampilan, menampilkan konten tersimpan, dan menyediakan fitur seperti cuaca serta kurs dolar.</string>
+    <string name="privacy_section_third_party_title">Layanan pihak ketiga</string>
+    <string name="privacy_section_third_party_body">YourGuide menggunakan layanan eksternal seperti Firebase untuk autentikasi dan penyimpanan data, API cuaca dan kurs dolar, serta layanan iklan jika diaktifkan. Penyedia ini dapat memproses data sesuai kebijakan mereka sendiri.</string>
+    <string name="privacy_section_retention_title">Penyimpanan data</string>
+    <string name="privacy_section_retention_body">Kami menyimpan data aplikasi hanya selama dibutuhkan untuk menyediakan fitur yang terhubung dengan akun Anda. Anda dapat keluar kapan saja, dan data lokal dapat dihapus dengan menghapus aplikasi.</string>
+    <string name="privacy_section_choices_title">Pilihan Anda</string>
+    <string name="privacy_section_choices_body">Anda dapat mengubah bahasa, menghapus aplikasi dari perangkat, dan berhenti menggunakan aplikasi kapan saja. Untuk pertanyaan, hubungi developer melalui listing toko atau kanal dukungan aplikasi.</string>
+    <string name="privacy_section_sharing_title">Berbagi data</string>
+    <string name="privacy_section_sharing_body">Kami tidak menjual data pribadi.</string>
+    <string name="logout_confirm_title">Konfirmasi</string>
+    <string name="logout_confirm_message">Apakah Anda yakin ingin keluar?</string>
+    <string name="yes">Ya</string>
+    <string name="no">Tidak</string>
+    <string name="share_app_message">Panduan wisata, cuaca, dan kurs dolar dalam satu aplikasi.</string>
+
+    <string name="search_placeholder">Cari destinasi, kota, atau kategori</string>
+    <string name="search_all_destinations">Semua destinasi</string>
+    <string name="search_results_found">%1$d hasil ditemukan</string>
+    <string name="search_no_results_found">Tidak ada hasil</string>
+    <string name="search_try_another_keyword">Coba kata kunci lain untuk "&quot;%1$s&quot;"</string>
+
+    <string name="love_empty_title">Belum ada destinasi tersimpan</string>
+    <string name="love_empty_body">Ketuk ikon hati pada destinasi untuk menyimpannya di sini.</string>
+
+    <string name="weather_forecast_title">Prakiraan 7 Hari</string>
+    <string name="weather_wind">Angin</string>
+    <string name="weather_rain">Hujan</string>
+    <string name="weather_rain_chance">Hujan %1$d%%</string>
+    <string name="weather_unavailable">Cuaca tidak tersedia</string>
+    <string name="weather_try_again">Coba lagi</string>
+    <string name="weather_clear">Cerah</string>
+    <string name="weather_mostly_clear">Sebagian cerah</string>
+    <string name="weather_cloudy">Berawan</string>
+    <string name="weather_foggy">Berkabut</string>
+    <string name="weather_drizzle">Gerimis</string>
+    <string name="weather_freezing_rain">Hujan beku</string>
+    <string name="weather_snow">Salju</string>
+    <string name="weather_rain_showers">Hujan lokal</string>
+    <string name="weather_snow_showers">Hujan salju</string>
+    <string name="weather_thunderstorm">Badai petir</string>
+    <string name="weather_changing_weather">Cuaca berubah</string>
+
+    <string name="currency_usd_to_major_currencies">USD ke mata uang utama</string>
+    <string name="currency_usd_exchange_rates">Kurs Dolar AS</string>
+    <string name="currency_updated">Diperbarui: %1$s</string>
+    <string name="currency_live_reference_rates">Referensi nilai harian langsung</string>
+    <string name="currency_one_usd_equals">1 USD = %1$s %2$s</string>
+    <string name="currency_unable_to_load">Tidak dapat memuat kurs</string>
+    <string name="currency_try_again">Coba lagi</string>
+
+    <string name="auth_app_name">YourGuide</string>
+    <string name="auth_enter_your_space">Masuk ke ruang Anda</string>
+    <string name="auth_description">Masuk untuk menjelajah dan mewujudkan ide kreatif Anda di aplikasi ini, saat inspirasi bertemu.</string>
+    <string name="auth_login_tab">Masuk</string>
+    <string name="auth_signup_tab">Daftar</string>
+    <string name="auth_name">Nama</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Kata Sandi</string>
+    <string name="auth_enter_name">Masukkan nama Anda</string>
+    <string name="auth_enter_email">Masukkan email Anda</string>
+    <string name="auth_enter_password">Masukkan kata sandi Anda</string>
+    <string name="auth_sign_up">Daftar</string>
+    <string name="auth_or_sign_up_with">Atau daftar dengan</string>
+    <string name="auth_forgot_password">Lupa kata sandi?</string>
+    <string name="auth_log_in">Masuk</string>
+    <string name="auth_or_log_in_with">Atau masuk dengan</string>
+    <string name="auth_google_button">Google</string>
+    <string name="auth_apple_button">Apple</string>
+    <string name="auth_google_web_client_missing">Google Web Client ID belum dikonfigurasi.</string>
+    <string name="auth_google_user_empty">Login Google berhasil, tapi Firebase user kosong.</string>
+    <string name="auth_google_login_failed_idtoken">Login Google gagal: idToken kosong. Di iOS, cek GIDServerClientID, GIDClientID, URL scheme REVERSED_CLIENT_ID, dan callback GIDSignIn.handle(url).</string>
+    <string name="auth_google_login_failed_unknown">Login Google gagal: %1$s.</string>
+    <string name="auth_google_login_failed_fallback">Login Google gagal.</string>
+
+    <string name="login_title">Masuk</string>
+    <string name="login_description">Gunakan akun Google untuk masuk ke YourGuideApp.</string>
+    <string name="login_google_button">Masuk dengan Google</string>
+    <string name="login_signed_in_as">Login sebagai %1$s</string>
+    <string name="login_google_user_empty">Login Google berhasil, tapi Firebase user kosong.</string>
+    <string name="login_google_web_client_missing">Google Web Client ID belum dikonfigurasi.</string>
+    <string name="login_google_login_failed_idtoken">Login Google gagal: idToken kosong. Di iOS, cek GIDServerClientID, GIDClientID, URL scheme REVERSED_CLIENT_ID, dan callback GIDSignIn.handle(url).</string>
+    <string name="login_google_login_failed_unknown">Login Google gagal: %1$s.</string>
+    <string name="login_google_login_failed_fallback">Login Google gagal.</string>
+    <string name="category_error">Ada kesalahan..</string>
+
+    <string name="common_skip">Lewati</string>
+</resources>

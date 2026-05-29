@@ -17,9 +17,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 @Composable
-fun ButtonView(text : String = "Skip",
+fun ButtonView(text : String,
                 roundShape : Int = 30,
                onClick :() -> Unit){
     Button(onClick = {
@@ -40,7 +42,7 @@ private fun ButtonViewPreview(){
         Column (modifier = Modifier.fillMaxSize()
             .rootBackground(),
             verticalArrangement = Arrangement.Center){
-            ButtonView(){}
+            ButtonView(text = stringResource(Res.string.common_skip)){}
         }
 
     }

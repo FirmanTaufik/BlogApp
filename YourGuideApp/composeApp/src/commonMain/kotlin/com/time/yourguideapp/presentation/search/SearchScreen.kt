@@ -54,6 +54,8 @@ import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.PostItem
 import com.time.yourguideapp.presentation.state.UIState
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 data class SearchScreen(val listPost : List<Posts>, val labels : List<Label>) : Screen {
     @Composable
@@ -137,7 +139,7 @@ data class SearchScreen(val listPost : List<Posts>, val labels : List<Label>) : 
                         shape = RoundedCornerShape(50),
                         placeholder = {
                             Text(
-                                text = "Search destinations, cities, or categories",
+                                text = stringResource(Res.string.search_placeholder),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -173,7 +175,11 @@ data class SearchScreen(val listPost : List<Posts>, val labels : List<Label>) : 
                 }
 
                 Text(
-                    text = if (query.isBlank()) "All destinations" else "${filteredPosts.size} results found",
+                    text = if (query.isBlank()) {
+                        stringResource(Res.string.search_all_destinations)
+                    } else {
+                        stringResource(Res.string.search_results_found, filteredPosts.size)
+                    },
                     color = AppColors.white,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -236,13 +242,13 @@ private fun EmptySearchResult(query: String) {
                 tint = AppColors.white,
             )
             Text(
-                text = "No results found",
+                text = stringResource(Res.string.search_no_results_found),
                 color = AppColors.white,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Try another keyword for \"$query\"",
+                text = stringResource(Res.string.search_try_another_keyword, query),
                 color = AppColors.white.copy(alpha = 0.82f),
                 style = MaterialTheme.typography.bodyMedium,
             )

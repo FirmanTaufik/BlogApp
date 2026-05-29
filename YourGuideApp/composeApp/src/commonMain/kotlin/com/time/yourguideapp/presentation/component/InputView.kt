@@ -96,7 +96,7 @@ fun InputView(input : String,
         leadingIcon = {
             Icon(
                 imageVector =  leadingIcon,
-                contentDescription = "",
+                contentDescription = null,
                 tint = Color.Gray.copy(alpha = 0.5f)
             )
         },
@@ -116,7 +116,7 @@ fun InputView(input : String,
 
                     Icon(
                         imageVector =  trailingIcon,
-                        contentDescription = "",
+                        contentDescription = null,
                         tint = Color.Gray.copy(alpha = 0.5f)
                     )
 

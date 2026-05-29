@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import org.jetbrains.compose.resources.stringResource
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.presentation.category.CategoryScreen
@@ -30,6 +31,7 @@ import com.time.yourguideapp.presentation.love.LoveScreen
 import com.time.yourguideapp.presentation.currency.CurrencyScreen
 import com.time.yourguideapp.presentation.state.UIState
 import com.time.yourguideapp.presentation.weather.WeatherScreen
+import yourguideapp.composeapp.generated.resources.*
 
 sealed class MainTab(
     private val index: UShort,
@@ -38,7 +40,7 @@ sealed class MainTab(
     override val options: TabOptions
         @Composable
         get() {
-                val icon = rememberVectorPainter(
+            val icon = rememberVectorPainter(
                 image = when (this) {
                     Home -> Icons.Outlined.Home
                     Explore -> Icons.Outlined.Explore
@@ -47,11 +49,18 @@ sealed class MainTab(
                     else -> Icons.Outlined.Favorite
                 }
             )
+            val tabTitle = when (this) {
+                Home -> stringResource(Res.string.nav_home)
+                Explore -> stringResource(Res.string.nav_explore)
+                Weather -> stringResource(Res.string.nav_weather)
+                Currency -> stringResource(Res.string.nav_currency)
+                else -> stringResource(Res.string.nav_loves)
+            }
 
-            return remember {
+            return remember(tabTitle, icon) {
                 TabOptions(
                     index = index,
-                    title = title,
+                    title = tabTitle,
                     icon = icon,
                 )
             }

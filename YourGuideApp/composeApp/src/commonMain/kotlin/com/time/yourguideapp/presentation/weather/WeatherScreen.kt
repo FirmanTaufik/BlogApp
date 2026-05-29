@@ -46,6 +46,8 @@ import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 @Composable
 fun WeatherScreen(
@@ -71,7 +73,7 @@ fun WeatherScreen(
             when {
                 uiState.isLoading -> WeatherLoadingCard()
                 uiState.errorMessage != null -> WeatherErrorCard(
-                    message = uiState.errorMessage.orEmpty(),
+                    message = uiState.errorMessage,
                     onRetry = viewModel::refresh,
                 )
                 uiState.forecast != null -> CurrentWeatherCard(
@@ -84,7 +86,7 @@ fun WeatherScreen(
         uiState.forecast?.let { forecast ->
             item {
                 Text(
-                    text = "7-Day Forecast",
+                    text = stringResource(Res.string.weather_forecast_title),
                     color = AppColors.blue123060,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -210,13 +212,13 @@ private fun CurrentWeatherCard(
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             WeatherMetric(
                 icon = Icons.Outlined.Air,
-                label = "Wind",
+                label = stringResource(Res.string.weather_wind),
                 value = "${forecast.windSpeed.rounded()} km/h",
                 modifier = Modifier.weight(1f),
             )
             WeatherMetric(
                 icon = Icons.Outlined.WaterDrop,
-                label = "Rain",
+                label = stringResource(Res.string.weather_rain),
                 value = "${forecast.days.firstOrNull()?.rainChance ?: 0}%",
                 modifier = Modifier.weight(1f),
             )
@@ -308,7 +310,7 @@ private fun DailyWeatherItem(day: DailyWeather) {
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Hujan ${day.rainChance}%",
+                text = stringResource(Res.string.weather_rain_chance, day.rainChance),
                 color = AppColors.blue123060.copy(alpha = 0.74f),
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -318,7 +320,7 @@ private fun DailyWeatherItem(day: DailyWeather) {
 
 @Composable
 private fun WeatherErrorCard(
-    message: String,
+    message: String?,
     onRetry: () -> Unit,
 ) {
     Column(
@@ -332,13 +334,13 @@ private fun WeatherErrorCard(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Weather unavailable",
+            text = stringResource(Res.string.weather_unavailable),
             color = AppColors.blue123060,
             fontWeight = FontWeight.Bold,
         )
         VerticalSpacer(6)
         Text(
-            text = message,
+            text = message ?: stringResource(Res.string.weather_unavailable),
             color = AppColors.blue123060.copy(alpha = 0.76f),
         )
         VerticalSpacer(12)
@@ -346,24 +348,25 @@ private fun WeatherErrorCard(
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(containerColor = AppColors.blue123060),
         ) {
-            Text("Try again", color = AppColors.white)
+            Text(stringResource(Res.string.weather_try_again), color = AppColors.white)
         }
     }
 }
 
+@Composable
 private fun weatherDescription(code: Int): String = when (code) {
-    0 -> "Clear"
-    1, 2 -> "Mostly clear"
-    3 -> "Cloudy"
-    45, 48 -> "Foggy"
-    51, 53, 55 -> "Drizzle"
-    61, 63, 65 -> "Rain"
-    66, 67 -> "Freezing rain"
-    71, 73, 75, 77 -> "Snow"
-    80, 81, 82 -> "Rain showers"
-    85, 86 -> "Snow showers"
-    95, 96, 99 -> "Thunderstorm"
-    else -> "Changing weather"
+    0 -> stringResource(Res.string.weather_clear)
+    1, 2 -> stringResource(Res.string.weather_mostly_clear)
+    3 -> stringResource(Res.string.weather_cloudy)
+    45, 48 -> stringResource(Res.string.weather_foggy)
+    51, 53, 55 -> stringResource(Res.string.weather_drizzle)
+    61, 63, 65 -> stringResource(Res.string.weather_rain)
+    66, 67 -> stringResource(Res.string.weather_freezing_rain)
+    71, 73, 75, 77 -> stringResource(Res.string.weather_snow)
+    80, 81, 82 -> stringResource(Res.string.weather_rain_showers)
+    85, 86 -> stringResource(Res.string.weather_snow_showers)
+    95, 96, 99 -> stringResource(Res.string.weather_thunderstorm)
+    else -> stringResource(Res.string.weather_changing_weather)
 }
 
 private fun weatherIcon(code: Int): ImageVector = when (code) {

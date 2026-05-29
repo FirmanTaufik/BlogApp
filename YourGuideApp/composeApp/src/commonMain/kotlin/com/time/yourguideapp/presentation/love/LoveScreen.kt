@@ -24,6 +24,8 @@ import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.detail.DetailScreen
 import com.time.yourguideapp.presentation.home.PostItem
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 @Composable
 fun LoveScreen(
@@ -81,12 +83,12 @@ private fun EmptyLoveContent(modifier: Modifier = Modifier) {
                 tint = AppColors.blue123060,
             )
             Text(
-                text = "No saved destinations yet",
+                text = stringResource(Res.string.love_empty_title),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Tap the heart icon on a destination to save it here.",
+                text = stringResource(Res.string.love_empty_body),
                 color = AppColors.blue123060.copy(alpha = 0.75f),
             )
         }

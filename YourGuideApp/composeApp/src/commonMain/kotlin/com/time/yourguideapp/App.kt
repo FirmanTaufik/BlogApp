@@ -16,6 +16,7 @@ import com.mmk.kmpauth.core.logger.KMPAuthLogger
 import com.mmk.kmpauth.core.logger.currentLogger
 import com.time.yourguideapp.di.appModule
 import com.time.yourguideapp.di.platformModule
+import com.time.yourguideapp.helper.ProvideAppLanguage
 import com.time.yourguideapp.presentation.auth.AuthScreen
 import com.time.yourguideapp.presentation.login.LoginScreen
 import com.time.yourguideapp.presentation.main.MainViewModel
@@ -45,18 +46,20 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
         koinAppDeclaration?.invoke(this)
         modules(appModule, platformModule)
     }), content = {
-        MaterialTheme {
-            val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+        ProvideAppLanguage {
+            MaterialTheme {
+                val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
 
-            if (currentUser == null) {
-                AuthScreen(modifier = Modifier)
-            } else {
-                val viewModel = koinViewModel<MainViewModel>()
+                if (currentUser == null) {
+                    AuthScreen(modifier = Modifier)
+                } else {
+                    val viewModel = koinViewModel<MainViewModel>()
 
-                CompositionLocalProvider(LocalMainViewModel provides viewModel) {
-                    Navigator(screen = RootScreen) { navigator ->
-                        CompositionLocalProvider(LocalRootNavigator provides navigator) {
-                            CurrentScreen()
+                    CompositionLocalProvider(LocalMainViewModel provides viewModel) {
+                        Navigator(screen = RootScreen) { navigator ->
+                            CompositionLocalProvider(LocalRootNavigator provides navigator) {
+                                CurrentScreen()
+                            }
                         }
                     }
                 }

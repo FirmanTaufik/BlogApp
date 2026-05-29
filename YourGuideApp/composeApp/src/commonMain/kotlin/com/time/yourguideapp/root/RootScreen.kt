@@ -83,7 +83,9 @@ import com.time.yourguideapp.presentation.search.SearchScreen
 import com.time.yourguideapp.presentation.state.UIState
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.instance.InstanceFactory
+import yourguideapp.composeapp.generated.resources.*
 
 data object RootScreen : Screen {
     @Composable
@@ -99,7 +101,7 @@ data object RootScreen : Screen {
             tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
             searchPosts = posts,
             labels = labels,
-            userName = currentUser?.displayName ?: "Traveler",
+            userName = currentUser?.displayName ?: stringResource(Res.string.default_display_name),
             userEmail = currentUser?.email ?: currentUser?.uid.orEmpty(),
             userPhotoUrl = currentUser?.photoURL,
         ) {
@@ -131,10 +133,10 @@ private fun RootContent(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                     ),
-                    title = {
-                        Column(verticalArrangement = Arrangement.Center) {
-                            Text(
-                                text = userName,
+        title = {
+            Column(verticalArrangement = Arrangement.Center) {
+                Text(
+                    text = userName,
                                 color = AppColors.blue123060,
                                 style = MaterialTheme.typography.titleMedium,
                                 maxLines = 1,
@@ -265,7 +267,7 @@ private fun MainNavigationBar(tabs: List<Tab>) {
                 itemsIndexed(tabs) { index, item ->
                     if (item.options.icon != null) {
                         if (index!= tabs.size-1) {
-                            CustomItemBar(item.options.title, item.options.icon!!) {
+                            CustomItemBar(item.options.icon!!) {
                                 tabNavigator.current = tabs[index]
                             }
 
@@ -277,7 +279,7 @@ private fun MainNavigationBar(tabs: List<Tab>) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            CustomItemBar( "Loves", rememberVectorPainter(Icons.Outlined.Favorite),
+            CustomItemBar(rememberVectorPainter(Icons.Outlined.Favorite),
                 iconSize = 40) {
                 tabNavigator.current = tabs[tabs.size-1]
             }
@@ -302,7 +304,7 @@ private fun LanguageDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Choose language",
+                stringResource(Res.string.choose_language),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
@@ -312,14 +314,14 @@ private fun LanguageDialog(
                 LanguageOption(
                     code = "id",
                     flagCode = "id",
-                    label = "Bahasa Indonesia",
+                    label = stringResource(Res.string.language_indonesian),
                     selectedLanguage = selectedLanguage,
                     onSelectLanguage = onSelectLanguage,
                 )
                 LanguageOption(
                     code = "en",
                     flagCode = "gb",
-                    label = "English",
+                    label = stringResource(Res.string.language_english),
                     selectedLanguage = selectedLanguage,
                     onSelectLanguage = onSelectLanguage,
                 )
@@ -327,7 +329,7 @@ private fun LanguageDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = AppColors.blue123060)
+                Text(stringResource(Res.string.close), color = AppColors.blue123060)
             }
         },
     )
@@ -389,11 +391,11 @@ private fun RootScreenPreview() {
             tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
             searchPosts = emptyList(),
             labels = emptyList(),
-            userName = "Traveler",
+            userName = stringResource(Res.string.default_display_name),
             userEmail = "traveler@example.com",
             userPhotoUrl = null,
         ) {
-            Text("Home")
+            Text(stringResource(Res.string.nav_home))
         }
     }
 }

@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -30,7 +29,7 @@ import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 
 @Composable
-fun CustomItemBar(text : String,
+fun CustomItemBar(
                   icon: Painter ,
                   iconSize : Int = 30,
                   onClick : () -> Unit){
@@ -66,7 +65,7 @@ fun CustomItemBarPreview(){
     MaterialTheme {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
             .rootBackground()) {
-            CustomItemBar("Home", rememberVectorPainter( Icons.Outlined.Home)){}
+            CustomItemBar(rememberVectorPainter( Icons.Outlined.Home)){}
         }
 
     }

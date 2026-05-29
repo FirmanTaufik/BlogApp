@@ -26,6 +26,8 @@ import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
 import com.time.yourguideapp.auth.GoogleSignInConfig
 import dev.gitlive.firebase.auth.FirebaseUser
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 @Composable
 fun LoginScreen(
@@ -35,6 +37,11 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var resultErrorMessage by remember { mutableStateOf<String?>(null) }
     var signedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
+    val googleWebClientMissingMessage = stringResource(Res.string.login_google_web_client_missing)
+    val googleUserEmptyMessage = stringResource(Res.string.login_google_user_empty)
+    val googleLoginFailedIdTokenMessage = stringResource(Res.string.login_google_login_failed_idtoken)
+    val googleLoginFailedFallbackMessage = stringResource(Res.string.login_google_login_failed_fallback)
+    val googleLoginFailedUnknownTemplate = stringResource(Res.string.login_google_login_failed_unknown)
 
     val googleAuthProviderResult = remember {
         if (GoogleSignInConfig.isConfigured) {
@@ -44,7 +51,7 @@ fun LoginScreen(
                 )
             }
         } else {
-            Result.failure(IllegalStateException("Google Web Client ID belum dikonfigurasi."))
+            Result.failure(IllegalStateException(googleWebClientMissingMessage))
         }
     }
     val configurationErrorMessage = googleAuthProviderResult.exceptionOrNull()?.message
@@ -57,12 +64,12 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Masuk",
+            text = stringResource(Res.string.login_title),
             style = MaterialTheme.typography.headlineSmall,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Gunakan akun Google untuk masuk ke YourGuideApp.",
+            text = stringResource(Res.string.login_description),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )
@@ -77,7 +84,7 @@ fun LoginScreen(
                     result
                         .onSuccess { user ->
                             if (user == null) {
-                                resultErrorMessage = "Login Google berhasil, tapi Firebase user kosong."
+                                resultErrorMessage = googleUserEmptyMessage
                             } else {
                                 signedInUser = user
                                 resultErrorMessage = null
@@ -85,7 +92,11 @@ fun LoginScreen(
                             }
                         }
                         .onFailure { throwable ->
-                            resultErrorMessage = throwable.toGoogleLoginMessage()
+                            resultErrorMessage = throwable.toGoogleLoginMessage(
+                                idTokenMessage = googleLoginFailedIdTokenMessage,
+                                fallbackMessage = googleLoginFailedFallbackMessage,
+                                unknownTemplate = googleLoginFailedUnknownTemplate,
+                            )
                         }
                 }
             ) {
@@ -104,7 +115,7 @@ fun LoginScreen(
                             strokeWidth = 2.dp,
                         )
                     } else {
-                        Text("Masuk dengan Google")
+                        Text(stringResource(Res.string.login_google_button))
                     }
                 }
             }
@@ -114,7 +125,7 @@ fun LoginScreen(
                 enabled = false,
                 onClick = {},
             ) {
-                Text("Masuk dengan Google")
+                Text(stringResource(Res.string.login_google_button))
             }
         }
 
@@ -122,7 +133,10 @@ fun LoginScreen(
         if (user != null) {
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Login sebagai ${user.displayName ?: user.email ?: user.uid}",
+                text = stringResource(
+                    Res.string.login_signed_in_as,
+                    user.displayName ?: user.email ?: user.uid,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
@@ -141,14 +155,18 @@ fun LoginScreen(
     }
 }
 
-private fun Throwable.toGoogleLoginMessage(): String {
+private fun Throwable.toGoogleLoginMessage(
+    idTokenMessage: String,
+    fallbackMessage: String,
+    unknownTemplate: String,
+): String {
     val rawMessage = message.orEmpty()
     return when {
         rawMessage.contains("idtoken is null", ignoreCase = true) ||
             rawMessage.contains("id token is null", ignoreCase = true) -> {
-            "Login Google gagal: idToken kosong. Di iOS, cek GIDServerClientID, GIDClientID, URL scheme REVERSED_CLIENT_ID, dan callback GIDSignIn.handle(url)."
+            idTokenMessage
         }
         rawMessage.isNotBlank() -> rawMessage
-        else -> "Login Google gagal: ${this::class.simpleName ?: "Unknown error"}."
+        else -> unknownTemplate.replace("%1\$s", this::class.simpleName ?: fallbackMessage)
     }
 }

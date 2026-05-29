@@ -1,0 +1,129 @@
+<resources>
+    <string name="app_name">YourGuide</string>
+    <string name="default_display_name">Traveler</string>
+    <string name="no_email_connected">No email connected</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_weather">Weather</string>
+    <string name="nav_currency">Dollar Rates</string>
+    <string name="nav_loves">Loves</string>
+
+    <string name="profile_title">Profile</string>
+    <string name="profile_language_label">Language</string>
+    <string name="choose_language">Choose language</string>
+    <string name="close">Close</string>
+    <string name="language_indonesian">Indonesian</string>
+    <string name="language_english">English</string>
+
+    <string name="section_app">App</string>
+    <string name="section_account">Account</string>
+    <string name="app_info_title">App Info</string>
+    <string name="app_info_subtitle">Name, version, and platform</string>
+    <string name="share_app_title">Share App</string>
+    <string name="share_app_subtitle">Share this app with others</string>
+    <string name="about_title">About</string>
+    <string name="about_subtitle">What this app is about</string>
+    <string name="privacy_title">Privacy Policy</string>
+    <string name="privacy_subtitle">How your data is handled</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_subtitle">Sign out from this account</string>
+
+    <string name="app_info_dialog_title">App Info</string>
+    <string name="app_info_name">Name</string>
+    <string name="app_info_version">Version</string>
+    <string name="app_info_platform">Platform</string>
+    <string name="about_dialog_title">About</string>
+    <string name="about_dialog_body">YourGuide helps travelers explore guides, check weather, and compare USD exchange rates in one place.</string>
+    <string name="privacy_dialog_title">Privacy Policy</string>
+    <string name="privacy_intro">This policy explains how YourGuide handles information inside the app.</string>
+    <string name="privacy_section_info_title">Information we use</string>
+    <string name="privacy_section_info_body">We may use your profile details from sign-in, saved items, language preference, search activity inside the app, and content you choose to view.</string>
+    <string name="privacy_section_use_title">How we use it</string>
+    <string name="privacy_section_use_body">We use this information to sign you in, personalize the interface, show your saved content, and provide features such as weather and exchange-rate screens.</string>
+    <string name="privacy_section_third_party_title">Third-party services</string>
+    <string name="privacy_section_third_party_body">YourGuide relies on external services such as Firebase for authentication and data storage, weather and exchange-rate APIs, and advertising services if enabled. These providers may process data according to their own policies.</string>
+    <string name="privacy_section_retention_title">Data retention</string>
+    <string name="privacy_section_retention_body">We keep app data only as long as needed to provide features tied to your account. You can sign out at any time, and local data can be removed by deleting the app.</string>
+    <string name="privacy_section_choices_title">Your choices</string>
+    <string name="privacy_section_choices_body">You can change language preference, clear the app from your device, and stop using the app at any time. For questions, contact the developer through the store listing or app support channel.</string>
+    <string name="privacy_section_sharing_title">Data sharing</string>
+    <string name="privacy_section_sharing_body">We do not sell personal data.</string>
+    <string name="logout_confirm_title">Confirmation</string>
+    <string name="logout_confirm_message">Are you sure you want to logout?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="share_app_message">Travel guides, weather, and exchange rates in one app.</string>
+
+    <string name="search_placeholder">Search destinations, cities, or categories</string>
+    <string name="search_all_destinations">All destinations</string>
+    <string name="search_results_found">%1$d results found</string>
+    <string name="search_no_results_found">No results found</string>
+    <string name="search_try_another_keyword">Try another keyword for "&quot;%1$s&quot;"</string>
+
+    <string name="love_empty_title">No saved destinations yet</string>
+    <string name="love_empty_body">Tap the heart icon on a destination to save it here.</string>
+
+    <string name="weather_forecast_title">7-Day Forecast</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_rain">Rain</string>
+    <string name="weather_rain_chance">Rain %1$d%%</string>
+    <string name="weather_unavailable">Weather unavailable</string>
+    <string name="weather_try_again">Try again</string>
+    <string name="weather_clear">Clear</string>
+    <string name="weather_mostly_clear">Mostly clear</string>
+    <string name="weather_cloudy">Cloudy</string>
+    <string name="weather_foggy">Foggy</string>
+    <string name="weather_drizzle">Drizzle</string>
+    <string name="weather_freezing_rain">Freezing rain</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_rain_showers">Rain showers</string>
+    <string name="weather_snow_showers">Snow showers</string>
+    <string name="weather_thunderstorm">Thunderstorm</string>
+    <string name="weather_changing_weather">Changing weather</string>
+
+    <string name="currency_usd_to_major_currencies">USD to Major Currencies</string>
+    <string name="currency_usd_exchange_rates">USD Exchange Rates</string>
+    <string name="currency_updated">Updated: %1$s</string>
+    <string name="currency_live_reference_rates">Live daily reference rates</string>
+    <string name="currency_one_usd_equals">1 USD = %1$s %2$s</string>
+    <string name="currency_unable_to_load">Unable to load exchange rates</string>
+    <string name="currency_try_again">Try again</string>
+
+    <string name="auth_app_name">YourGuide</string>
+    <string name="auth_enter_your_space">Enter Your Space</string>
+    <string name="auth_description">Log in to explore and bring your creative ideas to life on this app, when inspiration meets.</string>
+    <string name="auth_login_tab">Log in</string>
+    <string name="auth_signup_tab">Sign up</string>
+    <string name="auth_name">Name</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_enter_name">Enter your name</string>
+    <string name="auth_enter_email">Enter your email</string>
+    <string name="auth_enter_password">Enter your password</string>
+    <string name="auth_sign_up">Sign up</string>
+    <string name="auth_or_sign_up_with">Or sign up with</string>
+    <string name="auth_forgot_password">Forgot Password?</string>
+    <string name="auth_log_in">Log in</string>
+    <string name="auth_or_log_in_with">Or log in with</string>
+    <string name="auth_google_button">Google</string>
+    <string name="auth_apple_button">Apple</string>
+    <string name="auth_google_web_client_missing">Google Web Client ID is not configured.</string>
+    <string name="auth_google_user_empty">Google login succeeded, but Firebase user is empty.</string>
+    <string name="auth_google_login_failed_idtoken">Google login failed: idToken is empty. On iOS, check GIDServerClientID, GIDClientID, REVERSED_CLIENT_ID URL scheme, and the GIDSignIn.handle(url) callback.</string>
+    <string name="auth_google_login_failed_unknown">Google login failed: %1$s.</string>
+    <string name="auth_google_login_failed_fallback">Google login failed.</string>
+
+    <string name="login_title">Log in</string>
+    <string name="login_description">Use your Google account to sign in to YourGuideApp.</string>
+    <string name="login_google_button">Sign in with Google</string>
+    <string name="login_signed_in_as">Signed in as %1$s</string>
+    <string name="login_google_user_empty">Google login succeeded, but Firebase user is empty.</string>
+    <string name="login_google_web_client_missing">Google Web Client ID is not configured.</string>
+    <string name="login_google_login_failed_idtoken">Google login failed: idToken is empty. On iOS, check GIDServerClientID, GIDClientID, REVERSED_CLIENT_ID URL scheme, and the GIDSignIn.handle(url) callback.</string>
+    <string name="login_google_login_failed_unknown">Google login failed: %1$s.</string>
+    <string name="login_google_login_failed_fallback">Google login failed.</string>
+    <string name="category_error">Something went wrong..</string>
+
+    <string name="common_skip">Skip</string>
+</resources>

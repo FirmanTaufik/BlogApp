@@ -43,6 +43,8 @@ import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -70,7 +72,7 @@ fun CurrencyScreen(
             when {
                 uiState.isLoading -> CurrencyLoadingCard()
                 uiState.errorMessage != null -> CurrencyErrorCard(
-                    message = uiState.errorMessage.orEmpty(),
+                    message = uiState.errorMessage,
                     onRetry = viewModel::refresh,
                 )
                 topRate != null -> CurrencySummaryCard(rate = topRate)
@@ -80,7 +82,7 @@ fun CurrencyScreen(
         if (uiState.rates.isNotEmpty()) {
             item {
                 Text(
-                    text = "USD to Major Currencies",
+                    text = stringResource(Res.string.currency_usd_to_major_currencies),
                     color = AppColors.blue123060,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -129,14 +131,16 @@ private fun CurrencyHeaderCard(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "USD Exchange Rates",
+                text = stringResource(Res.string.currency_usd_exchange_rates),
                 color = AppColors.blue123060,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
             VerticalSpacer(4)
             Text(
-                text = updatedDate?.let { "Updated: $it" } ?: "Live daily reference rates",
+                text = updatedDate?.let {
+                    stringResource(Res.string.currency_updated, it)
+                } ?: stringResource(Res.string.currency_live_reference_rates),
                 color = AppColors.blue123060.copy(alpha = 0.78f),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -205,7 +209,11 @@ private fun CurrencySummaryCard(rate: CurrencyRate) {
         VerticalSpacer(12)
 
         Text(
-            text = "1 USD = ${rate.value.prettyRate()} ${rate.target.code}",
+            text = stringResource(
+                Res.string.currency_one_usd_equals,
+                rate.value.prettyRate(),
+                rate.target.code,
+            ),
             color = AppColors.blue123060.copy(alpha = 0.82f),
             style = MaterialTheme.typography.bodyMedium,
         )
@@ -268,7 +276,7 @@ private fun CurrencyRateItem(rate: CurrencyRate) {
 
 @Composable
 private fun CurrencyErrorCard(
-    message: String,
+    message: String?,
     onRetry: () -> Unit,
 ) {
     Column(
@@ -282,20 +290,20 @@ private fun CurrencyErrorCard(
             .padding(18.dp),
     ) {
         Text(
-            text = "Unable to load exchange rates",
+            text = stringResource(Res.string.currency_unable_to_load),
             color = AppColors.blue123060,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
         VerticalSpacer(8)
         Text(
-            text = message,
+            text = message ?: stringResource(Res.string.currency_unable_to_load),
             color = AppColors.blue123060.copy(alpha = 0.78f),
             style = MaterialTheme.typography.bodyMedium,
         )
         VerticalSpacer(12)
         Text(
-            text = "Try again",
+            text = stringResource(Res.string.currency_try_again),
             color = AppColors.blue123060,
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))

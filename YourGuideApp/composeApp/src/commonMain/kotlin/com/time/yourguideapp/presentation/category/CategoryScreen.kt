@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,14 +27,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.helper.AppLogger
+import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.PostItem
 import com.time.yourguideapp.presentation.state.UIState
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 import org.koin.compose.viewmodel.koinViewModel
 
 class CategoryScreen(val label : Label, val data : List<Posts>,
@@ -61,14 +66,27 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
             contentColor = Color.Transparent,
             topBar = {
                 TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                    ),
                     title = {
-                        Text(label.getCurrentLanguage())
+                        Text(
+                            text = label.getCurrentLanguage(),
+                            color = AppColors.blue123060,
+                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
                             onClickBack()
-                        }){
-                            Icon(imageVector = Icons.Default.ArrowBackIos, contentDescription = null)
+                        }, modifier = Modifier.glassmorphism(
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            backgroundColor = Color.White.copy(alpha = 0.30f),
+                        )) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBackIos,
+                                contentDescription = null,
+                                tint = AppColors.blue123060,
+                            )
                         }
                     }
                 )
@@ -98,7 +116,7 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
                         CircularProgressIndicator()
                     }
                     else -> {
-                        Text("Something went wrong..")
+                        Text(stringResource(Res.string.category_error))
                     }
                 }
             }

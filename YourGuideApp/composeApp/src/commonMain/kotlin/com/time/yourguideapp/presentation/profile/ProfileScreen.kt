@@ -68,6 +68,8 @@ import com.time.yourguideapp.presentation.component.VerticalSpacer
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 class ProfileScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -81,10 +83,15 @@ class ProfileScreen : Screen {
         val appVersion = getAppVersion()
         val platformName = getPlatform().name
         val selectedLanguage = AppManager.currentLanguage
-        val selectedLanguageLabel = if (selectedLanguage == "id") "Bahasa Indonesia" else "English"
-        val userName = currentUser?.displayName ?: "Traveler"
+        val selectedLanguageLabel = if (selectedLanguage == "id") {
+            stringResource(Res.string.language_indonesian)
+        } else {
+            stringResource(Res.string.language_english)
+        }
+        val userName = currentUser?.displayName ?: stringResource(Res.string.default_display_name)
         val userEmail = currentUser?.email ?: currentUser?.uid.orEmpty()
         val userPhotoUrl = currentUser?.photoURL
+        val shareMessage = stringResource(Res.string.share_app_message)
 
         var showLogoutDialog by remember { mutableStateOf(false) }
         var showAppInfoDialog by remember { mutableStateOf(false) }
@@ -106,7 +113,7 @@ class ProfileScreen : Screen {
                         ),
                         title = {
                             Text(
-                                text = "Profile",
+                                text = stringResource(Res.string.profile_title),
                                 color = AppColors.blue123060,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -143,7 +150,7 @@ class ProfileScreen : Screen {
                     )
                     VerticalSpacer(16)
 
-                    SectionTitle("App")
+                    SectionTitle(stringResource(Res.string.section_app))
                     AppSettingRow(
                         icon = {
                             Icon(
@@ -152,8 +159,8 @@ class ProfileScreen : Screen {
                                 tint = AppColors.blue123060,
                             )
                         },
-                        title = "App Info",
-                        subtitle = "Name, version, and platform",
+                        title = stringResource(Res.string.app_info_title),
+                        subtitle = stringResource(Res.string.app_info_subtitle),
                         onClick = { showAppInfoDialog = true },
                     )
                     VerticalSpacer(12)
@@ -165,12 +172,12 @@ class ProfileScreen : Screen {
                                 tint = AppColors.blue123060,
                             )
                         },
-                        title = "Share App",
-                        subtitle = "Share this app with others",
+                        title = stringResource(Res.string.share_app_title),
+                        subtitle = stringResource(Res.string.share_app_subtitle),
                         onClick = {
                             shareApp(
                                 "$appName v$appVersion\n" +
-                                    "Travel guides, weather, and exchange rates in one app."
+                                    shareMessage
                             )
                         },
                     )
@@ -183,8 +190,8 @@ class ProfileScreen : Screen {
                                 tint = AppColors.blue123060,
                             )
                         },
-                        title = "About",
-                        subtitle = "What this app is about",
+                        title = stringResource(Res.string.about_title),
+                        subtitle = stringResource(Res.string.about_subtitle),
                         onClick = { showAboutDialog = true },
                     )
                     VerticalSpacer(12)
@@ -196,13 +203,13 @@ class ProfileScreen : Screen {
                                 tint = AppColors.blue123060,
                             )
                         },
-                        title = "Privacy Policy",
-                        subtitle = "How your data is handled",
+                        title = stringResource(Res.string.privacy_title),
+                        subtitle = stringResource(Res.string.privacy_subtitle),
                         onClick = { showPrivacyDialog = true },
                     )
 
                     VerticalSpacer(18)
-                    SectionTitle("Account")
+                    SectionTitle(stringResource(Res.string.section_account))
                     AppSettingRow(
                         icon = {
                             Icon(
@@ -211,8 +218,8 @@ class ProfileScreen : Screen {
                                 tint = Color(0xFFB3261E),
                             )
                         },
-                        title = "Logout",
-                        subtitle = "Sign out from this account",
+                        title = stringResource(Res.string.logout_title),
+                        subtitle = stringResource(Res.string.logout_subtitle),
                         onClick = { showLogoutDialog = true },
                     )
                     VerticalSpacer(24)
@@ -310,7 +317,7 @@ private fun ProfileHeader(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = userEmail.ifBlank { "No email connected" },
+            text = userEmail.ifBlank { stringResource(Res.string.no_email_connected) },
             color = AppColors.blue123060.copy(alpha = 0.76f),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
@@ -332,7 +339,7 @@ private fun ProfileHeader(
                         modifier = Modifier.size(18.dp),
                     )
                 },
-                text = "Language: $selectedLanguageLabel",
+                text = "${stringResource(Res.string.profile_language_label)}: $selectedLanguageLabel",
                 onClick = { },
             )
         }
@@ -444,21 +451,21 @@ private fun AppInfoDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "App Info",
+                text = stringResource(Res.string.app_info_dialog_title),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Column {
-                InfoLine("Name", appName)
-                InfoLine("Version", appVersion)
-                InfoLine("Platform", platformName)
+                InfoLine(stringResource(Res.string.app_info_name), appName)
+                InfoLine(stringResource(Res.string.app_info_version), appVersion)
+                InfoLine(stringResource(Res.string.app_info_platform), platformName)
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = AppColors.blue123060)
+                Text(stringResource(Res.string.close), color = AppColors.blue123060)
             }
         },
     )
@@ -474,20 +481,20 @@ private fun AboutDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "About",
+                text = stringResource(Res.string.about_dialog_title),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Text(
-                text = "YourGuide helps travelers explore guides, check weather, and compare USD exchange rates in one place.",
+                text = stringResource(Res.string.about_dialog_body),
                 color = AppColors.blue123060.copy(alpha = 0.82f),
             )
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = AppColors.blue123060)
+                Text(stringResource(Res.string.close), color = AppColors.blue123060)
             }
         },
     )
@@ -503,7 +510,7 @@ private fun PrivacyPolicyDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Privacy Policy",
+                text = stringResource(Res.string.privacy_dialog_title),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
@@ -511,39 +518,39 @@ private fun PrivacyPolicyDialog(
         text = {
             Column {
                 Text(
-                    text = "This policy explains how YourGuide handles information inside the app.",
+                    text = stringResource(Res.string.privacy_intro),
                     color = AppColors.blue123060.copy(alpha = 0.82f),
                 )
                 VerticalSpacer(12)
                 PolicySection(
-                    title = "Information we use",
-                    body = "We may use your profile details from sign-in, saved items, language preference, search activity inside the app, and content you choose to view.",
+                    title = stringResource(Res.string.privacy_section_info_title),
+                    body = stringResource(Res.string.privacy_section_info_body),
                 )
                 PolicySection(
-                    title = "How we use it",
-                    body = "We use this information to sign you in, personalize the interface, show your saved content, and provide features such as weather and exchange-rate screens.",
+                    title = stringResource(Res.string.privacy_section_use_title),
+                    body = stringResource(Res.string.privacy_section_use_body),
                 )
                 PolicySection(
-                    title = "Third-party services",
-                    body = "YourGuide relies on external services such as Firebase for authentication and data storage, weather and exchange-rate APIs, and advertising services if enabled. These providers may process data according to their own policies.",
+                    title = stringResource(Res.string.privacy_section_third_party_title),
+                    body = stringResource(Res.string.privacy_section_third_party_body),
                 )
                 PolicySection(
-                    title = "Data retention",
-                    body = "We keep app data only as long as needed to provide features tied to your account. You can sign out at any time, and local data can be removed by deleting the app.",
+                    title = stringResource(Res.string.privacy_section_retention_title),
+                    body = stringResource(Res.string.privacy_section_retention_body),
                 )
                 PolicySection(
-                    title = "Your choices",
-                    body = "You can change language preference, clear the app from your device, and stop using the app at any time. For questions, contact the developer through the store listing or app support channel.",
+                    title = stringResource(Res.string.privacy_section_choices_title),
+                    body = stringResource(Res.string.privacy_section_choices_body),
                 )
                 PolicySection(
-                    title = "Data sharing",
-                    body = "We do not sell personal data.",
+                    title = stringResource(Res.string.privacy_section_sharing_title),
+                    body = stringResource(Res.string.privacy_section_sharing_body),
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = AppColors.blue123060)
+                Text(stringResource(Res.string.close), color = AppColors.blue123060)
             }
         },
     )
@@ -579,14 +586,14 @@ private fun LogoutDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Confirmation",
+                text = stringResource(Res.string.logout_confirm_title),
                 color = AppColors.blue123060,
                 fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Text(
-                text = "Are you sure you want to logout?",
+                text = stringResource(Res.string.logout_confirm_message),
                 color = AppColors.blue123060.copy(alpha = 0.82f),
             )
         },
@@ -595,7 +602,7 @@ private fun LogoutDialog(
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.blue123060),
             ) {
-                Text("Yes", color = Color.White)
+                Text(stringResource(Res.string.yes), color = Color.White)
             }
         },
         dismissButton = {
@@ -606,7 +613,7 @@ private fun LogoutDialog(
                     contentColor = AppColors.blue123060,
                 ),
             ) {
-                Text("No", color = AppColors.blue123060)
+                Text(stringResource(Res.string.no), color = AppColors.blue123060)
             }
         },
     )

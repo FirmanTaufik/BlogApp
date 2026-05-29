@@ -77,6 +77,7 @@ import com.time.yourguideapp.presentation.component.TabView
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import dev.gitlive.firebase.auth.FirebaseUser
 import org.jetbrains.compose.resources.stringResource
+import yourguideapp.composeapp.generated.resources.*
 
 @Composable
 fun AuthScreen(
@@ -86,7 +87,11 @@ fun AuthScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var resultErrorMessage by remember { mutableStateOf<String?>(null) }
-
+    val googleWebClientMissingMessage = stringResource(Res.string.auth_google_web_client_missing)
+    val googleUserEmptyMessage = stringResource(Res.string.auth_google_user_empty)
+    val googleLoginFailedIdTokenMessage = stringResource(Res.string.auth_google_login_failed_idtoken)
+    val googleLoginFailedFallbackMessage = stringResource(Res.string.auth_google_login_failed_fallback)
+    val googleLoginFailedUnknownTemplate = stringResource(Res.string.auth_google_login_failed_unknown)
 
     val googleAuthProviderResult = remember {
         if (GoogleSignInConfig.isConfigured) {
@@ -96,7 +101,7 @@ fun AuthScreen(
                 )
             }
         } else {
-            Result.failure(IllegalStateException("Google Web Client ID belum dikonfigurasi."))
+            Result.failure(IllegalStateException(googleWebClientMissingMessage))
         }
     }
     val configurationErrorMessage = googleAuthProviderResult.exceptionOrNull()?.message
@@ -131,14 +136,18 @@ fun AuthScreen(
                     result
                         .onSuccess { user ->
                             if (user == null) {
-                                resultErrorMessage = "Login Google berhasil, tapi Firebase user kosong."
+                                resultErrorMessage = googleUserEmptyMessage
                             } else {
                                 resultErrorMessage = null
                                 onLoginSuccess(user)
                             }
                         }
                         .onFailure { throwable ->
-                            resultErrorMessage = throwable.toGoogleLoginMessage()
+                            resultErrorMessage = throwable.toGoogleLoginMessage(
+                                idTokenMessage = googleLoginFailedIdTokenMessage,
+                                fallbackMessage = googleLoginFailedFallbackMessage,
+                                unknownTemplate = googleLoginFailedUnknownTemplate,
+                            )
                         }
                 },
                 onGoogleLoginConfigurationError = {
@@ -151,6 +160,9 @@ fun AuthScreen(
 
 @Composable
 private fun ContentHeader() {
+    val appName = getAppName()
+    val title = stringResource(Res.string.auth_enter_your_space)
+    val description = stringResource(Res.string.auth_description)
 
     Column(modifier = Modifier.padding(top = 20.dp, end = 10.dp, start = 10.dp)) {
         Row(
@@ -161,21 +173,21 @@ private fun ContentHeader() {
         ) {
 
             Text(
-                getAppName(), fontWeight = FontWeight.Bold,
+                appName, fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 color = AppColors.white,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            ButtonView(roundShape = 50) {
+            ButtonView(text = stringResource(Res.string.common_skip), roundShape = 50) {
 
             }
 
         }
         VerticalSpacer(10)
         Text(
-            "Enter Your Space", fontWeight = FontWeight.Bold,
+            title, fontWeight = FontWeight.Bold,
             fontSize = 25.sp,
             color = AppColors.white,
             maxLines = 1,
@@ -183,7 +195,7 @@ private fun ContentHeader() {
         )
 
         Text(
-            "Log in to explore and bring your creative ideas to life on this App, when inspiration meet",
+            description,
             color = AppColors.white,
         )
     }
@@ -200,7 +212,10 @@ private fun ContentAuth(
     onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
 ) {
-    val tabsList = listOf(" Log in"," Sign up")
+    val tabsList = listOf(
+        stringResource(Res.string.auth_login_tab),
+        stringResource(Res.string.auth_signup_tab),
+    )
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(1) }
     Card(
         shape = RoundedCornerShape(topEnd = 40.dp, topStart = 40.dp),
@@ -232,7 +247,7 @@ private fun ContentAuth(
             Row(verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = 20.dp)) {
-                AppleSignInButton (text = "Apple",
+                AppleSignInButton (text = stringResource(Res.string.auth_apple_button),
                     modifier = Modifier.weight(1f) ){
 
                 }
@@ -243,7 +258,7 @@ private fun ContentAuth(
                         filterByAuthorizedAccounts = false,
                         onResult = onGoogleLoginResult
                     ) {
-                        GoogleSignInButton (text = "Google",
+                        GoogleSignInButton (text = stringResource(Res.string.auth_google_button),
                             modifier = Modifier
                                 .glassmorphism()
                                 .weight(1f)
@@ -256,7 +271,7 @@ private fun ContentAuth(
                         }
                     }
                 } else {
-                    GoogleSignInButton (text = "Google",
+                    GoogleSignInButton (text = stringResource(Res.string.auth_google_button),
                         modifier = Modifier
                             .glassmorphism()
                             .weight(1f)
@@ -275,15 +290,19 @@ private fun ContentAuth(
     }
 }
 
-private fun Throwable.toGoogleLoginMessage(): String {
+private fun Throwable.toGoogleLoginMessage(
+    idTokenMessage: String,
+    fallbackMessage: String,
+    unknownTemplate: String,
+): String {
     val rawMessage = message.orEmpty()
     return when {
         rawMessage.contains("idtoken is null", ignoreCase = true) ||
             rawMessage.contains("id token is null", ignoreCase = true) -> {
-            "Login Google gagal: idToken kosong. Di iOS, cek GIDServerClientID, GIDClientID, URL scheme REVERSED_CLIENT_ID, dan callback GIDSignIn.handle(url)."
+            idTokenMessage
         }
         rawMessage.isNotBlank() -> rawMessage
-        else -> "Login Google gagal: ${this::class.simpleName ?: "Unknown error"}."
+        else -> unknownTemplate.replace("%1\$s", this::class.simpleName ?: fallbackMessage)
     }
 }
 
@@ -294,25 +313,25 @@ fun RegisterContent(modifier : Modifier) {
     var name by remember { mutableStateOf("") }
 
     Column {
-        Column(modifier = Modifier.fillMaxWidth()
+    Column(modifier = Modifier.fillMaxWidth()
             .padding(20.dp)) {
-            Text("Name", color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_name), color = Color.Black.copy(alpha = 0.5f))
             VerticalSpacer(10)
-            InputView(leadingIcon = Icons.Default.AccountCircle, placeHolder = "Enter Your Name",
+            InputView(leadingIcon = Icons.Default.AccountCircle, placeHolder = stringResource(Res.string.auth_enter_name),
                 input = name) {
                 name = it
             }
             VerticalSpacer(10)
-            Text("Email", color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_email), color = Color.Black.copy(alpha = 0.5f))
             VerticalSpacer(10)
-            InputView(leadingIcon = Icons.Default.Email, placeHolder = "Enter Your Email",
+            InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
                 input = email) {
                 email = it
             }
             VerticalSpacer(30)
-            Text("Password", color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_password), color = Color.Black.copy(alpha = 0.5f))
             VerticalSpacer(10)
-            InputView(leadingIcon = Icons.Default.Password, placeHolder = "Enter Your Password", isInputTypePassword = true,
+            InputView(leadingIcon = Icons.Default.Password, placeHolder = stringResource(Res.string.auth_enter_password), isInputTypePassword = true,
                 input = password) {
                 password = it
             }
@@ -325,14 +344,14 @@ fun RegisterContent(modifier : Modifier) {
             }, colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
                 modifier = Modifier
                     .fillMaxWidth().height(50.dp)){
-                Text("Sign up")
+                Text(stringResource(Res.string.auth_sign_up))
             }
             VerticalSpacer(25)
 
             Row(verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween){
                 HorizontalDivider(modifier = Modifier.weight(1f))
-                Text("Or sign up with",
+                Text(stringResource(Res.string.auth_or_sign_up_with),
                     modifier = Modifier.padding(horizontal = 10.dp),
                     color = Color.Gray.copy(alpha = 0.5f))
                 HorizontalDivider(modifier = Modifier.weight(1f))
@@ -349,16 +368,16 @@ private fun LoginContent(modifier: Modifier){
     var password by remember { mutableStateOf("") }
     Column(modifier = modifier.fillMaxWidth()
         .padding(20.dp)) {
-        Text("Email", color = Color.Black.copy(alpha = 0.5f))
+        Text(stringResource(Res.string.auth_email), color = Color.Black.copy(alpha = 0.5f))
         VerticalSpacer(10)
-        InputView(leadingIcon = Icons.Default.Email, placeHolder = "Enter Your Email",
+        InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
             input = email) {
             email = it
         }
         VerticalSpacer(30)
-        Text("Password", color = Color.Black.copy(alpha = 0.5f))
+        Text(stringResource(Res.string.auth_password), color = Color.Black.copy(alpha = 0.5f))
         VerticalSpacer(10)
-        InputView(leadingIcon = Icons.Default.Password, placeHolder = "Enter Your Password", isInputTypePassword = true,
+        InputView(leadingIcon = Icons.Default.Password, placeHolder = stringResource(Res.string.auth_enter_password), isInputTypePassword = true,
             input = password) {
             password = it
         }
@@ -366,7 +385,7 @@ private fun LoginContent(modifier: Modifier){
         VerticalSpacer(10)
         Row (modifier = Modifier.fillMaxWidth()){
             Spacer(Modifier.weight(1f))
-            Text("Forgot Password?", color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_forgot_password), color = Color.Black.copy(alpha = 0.5f))
 
         }
         VerticalSpacer(25)
@@ -376,14 +395,14 @@ private fun LoginContent(modifier: Modifier){
         }, colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
             modifier = Modifier
                 .fillMaxWidth().height(50.dp)){
-            Text("Log in")
+            Text(stringResource(Res.string.auth_log_in))
         }
         VerticalSpacer(25)
 
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween){
             HorizontalDivider(modifier = Modifier.weight(1f))
-            Text("Or log in with",
+            Text(stringResource(Res.string.auth_or_log_in_with),
                 modifier = Modifier.padding(horizontal = 10.dp),
                 color = Color.Gray.copy(alpha = 0.5f))
             HorizontalDivider(modifier = Modifier.weight(1f))

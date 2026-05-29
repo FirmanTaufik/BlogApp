@@ -49,7 +49,7 @@ class WeatherViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = error.message ?: "Gagal memuat prakiraan cuaca.",
+                            errorMessage = error.message,
                         )
                     }
                 },

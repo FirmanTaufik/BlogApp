@@ -41,7 +41,7 @@ class CurrencyViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = error.message ?: "Unable to load exchange rates.",
+                            errorMessage = error.message,
                         )
                     }
                 },
