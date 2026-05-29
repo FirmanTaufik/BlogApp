@@ -95,7 +95,7 @@ data object RootScreen : Screen {
 
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
             searchPosts = posts,
             labels = labels,
             userName = currentUser?.displayName ?: "Traveler",
@@ -313,7 +313,7 @@ private fun RootScreenPreview() {
     MaterialTheme {
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
             searchPosts = emptyList(),
             labels = emptyList(),
             userName = "Traveler",

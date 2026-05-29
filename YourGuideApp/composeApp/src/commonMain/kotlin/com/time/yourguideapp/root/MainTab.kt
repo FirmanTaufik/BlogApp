@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ import com.time.yourguideapp.presentation.explore.ExploreScreen
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.HomeScreen
 import com.time.yourguideapp.presentation.love.LoveScreen
+import com.time.yourguideapp.presentation.currency.CurrencyScreen
 import com.time.yourguideapp.presentation.state.UIState
 import com.time.yourguideapp.presentation.weather.WeatherScreen
 
@@ -36,11 +38,12 @@ sealed class MainTab(
     override val options: TabOptions
         @Composable
         get() {
-            val icon = rememberVectorPainter(
+                val icon = rememberVectorPainter(
                 image = when (this) {
                     Home -> Icons.Outlined.Home
                     Explore -> Icons.Outlined.Explore
                     Weather -> Icons.Outlined.WbSunny
+                    Currency -> Icons.Outlined.AttachMoney
                     else -> Icons.Outlined.Favorite
                 }
             )
@@ -99,8 +102,14 @@ sealed class MainTab(
         }
     }
 
+    data object Currency: MainTab(index = 3u, title = "Dollar") {
+        @Composable
+        override fun Content() {
+            CurrencyScreen()
+        }
+    }
 
-    data object Loves: MainTab(index = 3u, title = "Loves"){
+    data object Loves: MainTab(index = 4u, title = "Loves"){
         @Composable
         override fun Content() {
             val viewModel = LocalMainViewModel.current

@@ -1,8 +1,10 @@
 package com.time.yourguideapp.di
 
 import com.time.yourguideapp.data.remote.FirestoreGuideService
+import com.time.yourguideapp.data.repository.CurrencyRepository
 import com.time.yourguideapp.data.repository.MainRepository
 import com.time.yourguideapp.data.repository.WeatherRepository
+import com.time.yourguideapp.presentation.currency.CurrencyViewModel
 import com.time.yourguideapp.presentation.category.CategoryViewModel
 import com.time.yourguideapp.presentation.main.MainViewModel
 import com.time.yourguideapp.presentation.weather.WeatherViewModel
@@ -16,9 +18,11 @@ val appModule = module {
     single { FirestoreGuideService() }
     single { MainRepository(get(), get()) }
     single { WeatherRepository(get()) }
+    single { CurrencyRepository(get()) }
     viewModelOf(::MainViewModel)
     viewModelOf(::CategoryViewModel)
     viewModelOf(::WeatherViewModel)
+    viewModelOf(::CurrencyViewModel)
 }
 
 expect val platformModule: Module
