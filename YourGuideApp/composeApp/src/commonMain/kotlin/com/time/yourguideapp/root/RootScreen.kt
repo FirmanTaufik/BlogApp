@@ -1,6 +1,7 @@
 package com.time.yourguideapp.root
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,23 +33,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -68,6 +69,7 @@ import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
+import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
@@ -81,7 +83,6 @@ import com.time.yourguideapp.presentation.search.SearchScreen
 import com.time.yourguideapp.presentation.state.UIState
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
-import kotlinx.coroutines.launch
 import org.koin.core.instance.InstanceFactory
 
 data object RootScreen : Screen {
@@ -120,9 +121,8 @@ private fun RootContent(
     content: @Composable () -> Unit,
 ) {
 
-    var showDialogConfirmation by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     val rootNavigator = LocalRootNavigator.current
-    val coroutineScope = rememberCoroutineScope()
 
     TabNavigator(initialTab) {
         Scaffold(
@@ -197,12 +197,12 @@ private fun RootContent(
 
                         IconButton(
                             onClick = {
-                                showDialogConfirmation = true
+                                showLanguageDialog = true
                             },
                             modifier = Modifier.glassmorphism(CircleShape,   backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                imageVector = Icons.Default.Language,
                                 contentDescription = null,
                                 tint = AppColors.blue123060
                             )
@@ -230,34 +230,17 @@ private fun RootContent(
         }
     }
 
-    if (showDialogConfirmation) {
-        AlertDialog(
-            modifier = Modifier.glassmorphism(),
-            containerColor = Color.Transparent,
-            onDismissRequest = {
-            showDialogConfirmation = false
-        }, title = {
-            Text("Confirmation", color = AppColors.white)
-        }, text = {
-            Text(text = "Are you sure want to logout?", color = AppColors.white.copy(alpha = 0.8f))
-        }, confirmButton = {
-                Button(onClick = {
-                    showDialogConfirmation = false
-                    coroutineScope.launch {
-                        Firebase.auth.signOut()
-                    }
-                }, modifier = Modifier.glassmorphism(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)){
-                    Text("Yes")
-                }
-        }, dismissButton = {
-            Button(onClick = {
-                showDialogConfirmation = false
-            }, modifier = Modifier.glassmorphism(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)){
-                Text("No")
-            }
-        })
+    if (showLanguageDialog) {
+        LanguageDialog(
+            selectedLanguage = AppManager.currentLanguage,
+            onSelectLanguage = { language ->
+                AppManager.currentLanguage = language
+                showLanguageDialog = false
+            },
+            onDismiss = {
+                showLanguageDialog = false
+            },
+        )
     }
 }
 
@@ -305,6 +288,96 @@ private fun MainNavigationBar(tabs: List<Tab>) {
         VerticalSpacer(50)
 
     }
+}
+
+@Composable
+private fun LanguageDialog(
+    selectedLanguage: String,
+    onSelectLanguage: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier,
+        containerColor = Color.White,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Choose language",
+                color = AppColors.blue123060,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column {
+                LanguageOption(
+                    code = "id",
+                    flagCode = "id",
+                    label = "Bahasa Indonesia",
+                    selectedLanguage = selectedLanguage,
+                    onSelectLanguage = onSelectLanguage,
+                )
+                LanguageOption(
+                    code = "en",
+                    flagCode = "gb",
+                    label = "English",
+                    selectedLanguage = selectedLanguage,
+                    onSelectLanguage = onSelectLanguage,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = AppColors.blue123060)
+            }
+        },
+    )
+}
+
+@Composable
+private fun LanguageOption(
+    code: String,
+    flagCode: String,
+    label: String,
+    selectedLanguage: String,
+    onSelectLanguage: (String) -> Unit,
+) {
+    val selected = code == selectedLanguage
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelectLanguage(code) }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.RadioButton(
+            selected = selected,
+            onClick = { onSelectLanguage(code) },
+            colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                selectedColor = AppColors.blue123060,
+                unselectedColor = AppColors.blue123060.copy(alpha = 0.45f),
+            ),
+        )
+        HorizontalSpacer(6)
+        AsyncImage(
+            model = flagUrl(flagCode),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape),
+        )
+        HorizontalSpacer(10)
+        Text(
+            text = label,
+            color = AppColors.blue123060,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+private fun flagUrl(flagCode: String): String {
+    return "https://flagcdn.com/h40/$flagCode.png"
 }
 
 @Composable

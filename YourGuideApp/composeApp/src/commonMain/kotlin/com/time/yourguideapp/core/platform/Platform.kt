@@ -14,3 +14,8 @@ expect fun getPlatform(): Platform
 
 @Composable
 expect fun getAppName(): String
+
+expect fun getAppVersion(): String
+
+@Composable
+expect fun rememberShareAppLauncher(): (String) -> Unit

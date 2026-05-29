@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -16,18 +16,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,10 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.core.platform.getAppName
+import com.time.yourguideapp.core.platform.getAppVersion
+import com.time.yourguideapp.core.platform.getPlatform
+import com.time.yourguideapp.core.platform.rememberShareAppLauncher
 import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
@@ -60,22 +67,29 @@ import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import kotlinx.coroutines.launch
 
-
-class ProfileScreen(
-
-) : Screen {
+class ProfileScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
-        var showLanguageDialog by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+        val shareApp = rememberShareAppLauncher()
+        val appName = getAppName()
+        val appVersion = getAppVersion()
+        val platformName = getPlatform().name
         val selectedLanguage = AppManager.currentLanguage
         val selectedLanguageLabel = if (selectedLanguage == "id") "Bahasa Indonesia" else "English"
         val userName = currentUser?.displayName ?: "Traveler"
         val userEmail = currentUser?.email ?: currentUser?.uid.orEmpty()
         val userPhotoUrl = currentUser?.photoURL
+
+        var showLogoutDialog by remember { mutableStateOf(false) }
+        var showAppInfoDialog by remember { mutableStateOf(false) }
+        var showAboutDialog by remember { mutableStateOf(false) }
+        var showPrivacyDialog by remember { mutableStateOf(false) }
 
         Box(
             modifier = Modifier
@@ -84,7 +98,6 @@ class ProfileScreen(
                 .padding(10.dp),
         ) {
             Scaffold(
-                modifier = Modifier,
                 containerColor = Color.Transparent,
                 topBar = {
                     TopAppBar(
@@ -100,9 +113,7 @@ class ProfileScreen(
                         },
                         navigationIcon = {
                             IconButton(
-                                onClick = {
-                                    navigator.pop()
-                                },
+                                onClick = { navigator.pop() },
                                 modifier = Modifier.glassmorphism(
                                     CircleShape,
                                     backgroundColor = Color.White.copy(alpha = 0.30f),
@@ -129,37 +140,117 @@ class ProfileScreen(
                         userEmail = userEmail,
                         userPhotoUrl = userPhotoUrl,
                         selectedLanguageLabel = selectedLanguageLabel,
-                        onChangeLanguage = {
-                            showLanguageDialog = true
-                        },
                     )
                     VerticalSpacer(16)
-                    SectionTitle("Pengaturan")
-                    LanguageSettingRow(
-                        selectedLanguageLabel = selectedLanguageLabel,
-                        onClick = {
-                            showLanguageDialog = true
+
+                    SectionTitle("App")
+                    AppSettingRow(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = AppColors.blue123060,
+                            )
                         },
+                        title = "App Info",
+                        subtitle = "Name, version, and platform",
+                        onClick = { showAppInfoDialog = true },
+                    )
+                    VerticalSpacer(12)
+                    AppSettingRow(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = null,
+                                tint = AppColors.blue123060,
+                            )
+                        },
+                        title = "Share App",
+                        subtitle = "Share this app with others",
+                        onClick = {
+                            shareApp(
+                                "$appName v$appVersion\n" +
+                                    "Travel guides, weather, and exchange rates in one app."
+                            )
+                        },
+                    )
+                    VerticalSpacer(12)
+                    AppSettingRow(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = AppColors.blue123060,
+                            )
+                        },
+                        title = "About",
+                        subtitle = "What this app is about",
+                        onClick = { showAboutDialog = true },
+                    )
+                    VerticalSpacer(12)
+                    AppSettingRow(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = AppColors.blue123060,
+                            )
+                        },
+                        title = "Privacy Policy",
+                        subtitle = "How your data is handled",
+                        onClick = { showPrivacyDialog = true },
+                    )
+
+                    VerticalSpacer(18)
+                    SectionTitle("Account")
+                    AppSettingRow(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = null,
+                                tint = Color(0xFFB3261E),
+                            )
+                        },
+                        title = "Logout",
+                        subtitle = "Sign out from this account",
+                        onClick = { showLogoutDialog = true },
                     )
                     VerticalSpacer(24)
                 }
             }
         }
 
-        if (showLanguageDialog) {
-            LanguageDialog(
-                selectedLanguage = selectedLanguage,
-                onSelectLanguage = { language ->
-                    AppManager.currentLanguage = language
-                    showLanguageDialog = false
+        if (showAppInfoDialog) {
+            AppInfoDialog(
+                appName = appName,
+                appVersion = appVersion,
+                platformName = platformName,
+                onDismiss = { showAppInfoDialog = false },
+            )
+        }
+
+        if (showAboutDialog) {
+            AboutDialog(
+                onDismiss = { showAboutDialog = false },
+            )
+        }
+
+        if (showPrivacyDialog) {
+            PrivacyPolicyDialog(
+                onDismiss = { showPrivacyDialog = false },
+            )
+        }
+
+        if (showLogoutDialog) {
+            LogoutDialog(
+                onConfirm = {
+                    showLogoutDialog = false
+                    coroutineScope.launch { Firebase.auth.signOut() }
                 },
-                onDismiss = {
-                    showLanguageDialog = false
-                },
+                onDismiss = { showLogoutDialog = false },
             )
         }
     }
-
 }
 
 @Composable
@@ -168,7 +259,6 @@ private fun ProfileHeader(
     userEmail: String,
     userPhotoUrl: String?,
     selectedLanguageLabel: String,
-    onChangeLanguage: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -242,8 +332,8 @@ private fun ProfileHeader(
                         modifier = Modifier.size(18.dp),
                     )
                 },
-                text = "Ubah Bahasa: $selectedLanguageLabel",
-                onClick = onChangeLanguage,
+                text = "Language: $selectedLanguageLabel",
+                onClick = { },
             )
         }
     }
@@ -287,8 +377,10 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun LanguageSettingRow(
-    selectedLanguageLabel: String,
+private fun AppSettingRow(
+    icon: @Composable () -> Unit,
+    title: String,
+    subtitle: String,
     onClick: () -> Unit,
 ) {
     Row(
@@ -311,24 +403,20 @@ private fun LanguageSettingRow(
                 .background(AppColors.blueaad2fb.copy(alpha = 0.42f)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = Icons.Default.Language,
-                contentDescription = null,
-                tint = AppColors.blue123060,
-            )
+            icon()
         }
 
         HorizontalSpacer(14)
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Ubah Bahasa",
+                text = title,
                 color = AppColors.blue123060,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Saat ini: $selectedLanguageLabel",
+                text = subtitle,
                 color = AppColors.blue123060.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -336,7 +424,7 @@ private fun LanguageSettingRow(
 
         Spacer(modifier = Modifier.size(8.dp))
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            imageVector = Icons.Filled.ArrowForwardIos,
             contentDescription = null,
             tint = AppColors.blue123060.copy(alpha = 0.8f),
         )
@@ -344,97 +432,209 @@ private fun LanguageSettingRow(
 }
 
 @Composable
-private fun LanguageDialog(
-    selectedLanguage: String,
-    onSelectLanguage: (String) -> Unit,
+private fun AppInfoDialog(
+    appName: String,
+    appVersion: String,
+    platformName: String,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
-        modifier = Modifier.glassmorphism(),
-        containerColor = Color.Transparent,
+        modifier = Modifier,
+        containerColor = Color.White,
         onDismissRequest = onDismiss,
         title = {
-            Text("Choose language", color = AppColors.white)
+            Text(
+                text = "App Info",
+                color = AppColors.blue123060,
+                fontWeight = FontWeight.Bold,
+            )
         },
         text = {
             Column {
-                LanguageOption(
-                    code = "id",
-                    flag = "🇮🇩",
-                    label = "Bahasa Indonesia",
-                    selectedLanguage = selectedLanguage,
-                    onSelectLanguage = onSelectLanguage,
-                )
-                LanguageOption(
-                    code = "en",
-                    flag = "🇬🇧",
-                    label = "English",
-                    selectedLanguage = selectedLanguage,
-                    onSelectLanguage = onSelectLanguage,
-                )
+                InfoLine("Name", appName)
+                InfoLine("Version", appVersion)
+                InfoLine("Platform", platformName)
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = AppColors.white)
+                Text("Close", color = AppColors.blue123060)
             }
         },
     )
 }
 
 @Composable
-private fun LanguageOption(
-    code: String,
-    flag: String,
-    label: String,
-    selectedLanguage: String,
-    onSelectLanguage: (String) -> Unit,
+private fun AboutDialog(
+    onDismiss: () -> Unit,
 ) {
-    val selected = code == selectedLanguage
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                onSelectLanguage(code)
+    AlertDialog(
+        modifier = Modifier,
+        containerColor = Color.White,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "About",
+                color = AppColors.blue123060,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Text(
+                text = "YourGuide helps travelers explore guides, check weather, and compare USD exchange rates in one place.",
+                color = AppColors.blue123060.copy(alpha = 0.82f),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = AppColors.blue123060)
             }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = {
-                onSelectLanguage(code)
-            },
-            colors = RadioButtonDefaults.colors(
-                selectedColor = AppColors.white,
-                unselectedColor = AppColors.white.copy(alpha = 0.7f),
-            ),
-        )
-        HorizontalSpacer(6)
-        Text(
-            text = flag,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        HorizontalSpacer(10)
+        },
+    )
+}
+
+@Composable
+private fun PrivacyPolicyDialog(
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier,
+        containerColor = Color.White,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Privacy Policy",
+                color = AppColors.blue123060,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "This policy explains how YourGuide handles information inside the app.",
+                    color = AppColors.blue123060.copy(alpha = 0.82f),
+                )
+                VerticalSpacer(12)
+                PolicySection(
+                    title = "Information we use",
+                    body = "We may use your profile details from sign-in, saved items, language preference, search activity inside the app, and content you choose to view.",
+                )
+                PolicySection(
+                    title = "How we use it",
+                    body = "We use this information to sign you in, personalize the interface, show your saved content, and provide features such as weather and exchange-rate screens.",
+                )
+                PolicySection(
+                    title = "Third-party services",
+                    body = "YourGuide relies on external services such as Firebase for authentication and data storage, weather and exchange-rate APIs, and advertising services if enabled. These providers may process data according to their own policies.",
+                )
+                PolicySection(
+                    title = "Data retention",
+                    body = "We keep app data only as long as needed to provide features tied to your account. You can sign out at any time, and local data can be removed by deleting the app.",
+                )
+                PolicySection(
+                    title = "Your choices",
+                    body = "You can change language preference, clear the app from your device, and stop using the app at any time. For questions, contact the developer through the store listing or app support channel.",
+                )
+                PolicySection(
+                    title = "Data sharing",
+                    body = "We do not sell personal data.",
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = AppColors.blue123060)
+            }
+        },
+    )
+}
+
+@Composable
+private fun PolicySection(
+    title: String,
+    body: String,
+) {
+    VerticalSpacer(10)
+    Text(
+        text = title,
+        color = AppColors.blue123060,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+    )
+    VerticalSpacer(6)
+    Text(
+        text = body,
+        color = AppColors.blue123060.copy(alpha = 0.82f),
+    )
+}
+
+@Composable
+private fun LogoutDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        modifier = Modifier,
+        containerColor = Color.White,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Confirmation",
+                color = AppColors.blue123060,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to logout?",
+                color = AppColors.blue123060.copy(alpha = 0.82f),
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.blue123060),
+            ) {
+                Text("Yes", color = Color.White)
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFEAF1FB),
+                    contentColor = AppColors.blue123060,
+                ),
+            ) {
+                Text("No", color = AppColors.blue123060)
+            }
+        },
+    )
+}
+
+@Composable
+private fun InfoLine(
+    label: String,
+    value: String,
+) {
+    Column(modifier = Modifier.padding(bottom = 10.dp)) {
         Text(
             text = label,
-            color = AppColors.white,
-            modifier = Modifier.weight(1f),
+            color = AppColors.blue123060.copy(alpha = 0.72f),
+            style = MaterialTheme.typography.labelMedium,
         )
-        if (selected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = AppColors.white,
-            )
-        }
+        Text(
+            text = value,
+            color = AppColors.blue123060,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+        )
     }
 }
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
-fun ProfileScreenPreview(){
+fun ProfileScreenPreview() {
     MaterialTheme {
         ProfileScreen().Content()
     }
