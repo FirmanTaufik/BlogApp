@@ -23,12 +23,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.AddLocation
 import androidx.compose.material.icons.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.ShareLocation
 import androidx.compose.material3.BottomAppBar
@@ -45,6 +46,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -61,6 +64,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.helper.Dummy
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.model.Label
@@ -68,6 +72,8 @@ import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
+import com.time.yourguideapp.presentation.home.HomeData
+import com.time.yourguideapp.presentation.state.UIState
 
 data class DetailScreen(
     val data: Posts,
@@ -76,9 +82,16 @@ data class DetailScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val mainViewModel = LocalMainViewModel.current
+        val mainState by mainViewModel.state.collectAsState()
+        val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
+            ?.bookmarkPostIds
+            .orEmpty()
+
         DetailContent(
             onBack = { navigator.pop() },
-            onBookmark = {},
+            isLoved = bookmarkPostIds.contains(data.idPost),
+            onBookmark = { mainViewModel.toggleBookmark(data.idPost) },
             onShare = {},
         )
     }
@@ -88,6 +101,7 @@ data class DetailScreen(
     @Composable
     private fun DetailContent(
         onBack: () -> Unit,
+        isLoved: Boolean,
         onBookmark: () -> Unit,
         onShare: () -> Unit,
     ) {
@@ -128,9 +142,13 @@ data class DetailScreen(
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.BookmarkBorder,
+                                imageVector = if (isLoved) {
+                                    Icons.Filled.Favorite
+                                } else {
+                                    Icons.Outlined.FavoriteBorder
+                                },
                                 contentDescription = null,
-                                tint = AppColors.blue123060,
+                                tint = if (isLoved) Color(0xFFE94B6A) else AppColors.blue123060,
                             )
                         }
                         HorizontalSpacer(15)

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -34,8 +35,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.CollectionsBookmark
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,11 +45,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,22 +64,43 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
+import com.time.yourguideapp.model.Label
+import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
+import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.profile.ProfileScreen
+import com.time.yourguideapp.presentation.search.SearchScreen
+import com.time.yourguideapp.presentation.state.UIState
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.auth
+import kotlinx.coroutines.launch
 import org.koin.core.instance.InstanceFactory
 
 data object RootScreen : Screen {
     @Composable
     override fun Content() {
+        val viewModel = LocalMainViewModel.current
+        val state by viewModel.state.collectAsState()
+        val posts = ((state as? UIState.Success<*>)?.data as? HomeData)?.posts.orEmpty()
+        val labels = ((state as? UIState.Success<*>)?.data as? HomeData)?.labels.orEmpty()
+        val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+
         RootContent(
             initialTab = MainTab.Home,
             tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
+            searchPosts = posts,
+            labels = labels,
+            userName = currentUser?.displayName ?: "Traveler",
+            userEmail = currentUser?.email ?: currentUser?.uid.orEmpty(),
+            userPhotoUrl = currentUser?.photoURL,
         ) {
             CurrentTab()
         }
@@ -85,11 +112,17 @@ data object RootScreen : Screen {
 private fun RootContent(
     initialTab: Tab,
     tabs: List<Tab>,
+    searchPosts: List<Posts>,
+    labels : List<Label>,
+    userName: String,
+    userEmail: String,
+    userPhotoUrl: String?,
     content: @Composable () -> Unit,
 ) {
 
     var showDialogConfirmation by remember { mutableStateOf(false) }
-    //val rootNavigator = LocalRootNavigator.current
+    val rootNavigator = LocalRootNavigator.current
+    val coroutineScope = rememberCoroutineScope()
 
     TabNavigator(initialTab) {
         Scaffold(
@@ -99,10 +132,21 @@ private fun RootContent(
                         containerColor = Color.Transparent,
                     ),
                     title = {
-                        Column (verticalArrangement = Arrangement.Center, ){
-                            Text("Abdulah Bin Jaenudin",color = AppColors.blue123060,
-                                style = MaterialTheme.typography.titleMedium)
-                            Text("abdulah@masil.com",color = AppColors.blue123060.copy(alpha = 0.8f),  style = MaterialTheme.typography.bodySmall)
+                        Column(verticalArrangement = Arrangement.Center) {
+                            Text(
+                                text = userName,
+                                color = AppColors.blue123060,
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = userEmail,
+                                color = AppColors.blue123060.copy(alpha = 0.8f),
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     },
 
@@ -114,11 +158,22 @@ private fun RootContent(
                             },
                             modifier = Modifier.glassmorphism(CircleShape, backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountCircle,
-                                contentDescription = null,
-                                tint = AppColors.blue123060
-                            )
+                            if (userPhotoUrl.isNullOrBlank()) {
+                                Icon(
+                                    imageVector = Icons.Outlined.AccountCircle,
+                                    contentDescription = null,
+                                    tint = AppColors.blue123060
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = userPhotoUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                         }
                     },
 
@@ -127,7 +182,7 @@ private fun RootContent(
 
                         IconButton(
                             onClick = {
-                                // search
+                                rootNavigator.push(SearchScreen(searchPosts, labels = labels))
                             },
                             modifier = Modifier.glassmorphism(CircleShape,   backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
@@ -147,7 +202,7 @@ private fun RootContent(
                             modifier = Modifier.glassmorphism(CircleShape,   backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Logout,
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
                                 contentDescription = null,
                                 tint = AppColors.blue123060
                             )
@@ -188,6 +243,9 @@ private fun RootContent(
         }, confirmButton = {
                 Button(onClick = {
                     showDialogConfirmation = false
+                    coroutineScope.launch {
+                        Firebase.auth.signOut()
+                    }
                 }, modifier = Modifier.glassmorphism(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)){
                     Text("Yes")
@@ -236,7 +294,7 @@ private fun MainNavigationBar(tabs: List<Tab>) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            CustomItemBar( "Loves", rememberVectorPainter(Icons.Outlined.CollectionsBookmark),
+            CustomItemBar( "Loves", rememberVectorPainter(Icons.Outlined.Favorite),
                 iconSize = 40) {
                 tabNavigator.current = tabs[tabs.size-1]
             }
@@ -256,6 +314,11 @@ private fun RootScreenPreview() {
         RootContent(
             initialTab = MainTab.Home,
             tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
+            searchPosts = emptyList(),
+            labels = emptyList(),
+            userName = "Traveler",
+            userEmail = "traveler@example.com",
+            userPhotoUrl = null,
         ) {
             Text("Home")
         }

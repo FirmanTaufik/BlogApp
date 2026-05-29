@@ -9,6 +9,7 @@ import com.time.yourguideapp.presentation.state.UIState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class MainRepository(
@@ -16,14 +17,19 @@ class MainRepository(
     private val firestoreService: FirestoreGuideService,
 ) {
 
-    fun observeHomeState(): Flow<UIState> {
+    fun observeHomeState(userId: String?): Flow<UIState> {
+        val bookmarkIdsFlow = userId
+            ?.let { firestoreService.observeUserBookmarkPostIds(it) }
+            ?: flowOf(emptyList())
+
         return combine(
             firestoreService.getFeaturedGuide(),
             firestoreService.observeLabels(),
-            firestoreService.getObserverLocales()
-        ) { posts, labels, locales ->
+            firestoreService.getObserverLocales(),
+            bookmarkIdsFlow,
+        ) { posts, labels, locales, bookmarkPostIds ->
             UIState.Success(
-                    HomeData(labels = labels, posts, locales)
+                    HomeData(labels = labels, posts, locales, bookmarkPostIds)
                 ) as UIState
         }.catch { error ->
                 emit(
@@ -37,6 +43,14 @@ class MainRepository(
                     )
                 )
             }
+    }
+
+    suspend fun addBookmark(userId: String, postId: String) {
+        firestoreService.addBookmark(userId, postId)
+    }
+
+    suspend fun removeBookmark(userId: String, postId: String) {
+        firestoreService.removeBookmark(userId, postId)
     }
 
 

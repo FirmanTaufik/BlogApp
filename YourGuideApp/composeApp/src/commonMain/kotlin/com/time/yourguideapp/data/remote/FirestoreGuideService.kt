@@ -1,5 +1,6 @@
 package com.time.yourguideapp.data.remote
 
+import com.time.yourguideapp.model.Bookmark
 import com.time.yourguideapp.model.GuideDocument
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Locales
@@ -47,5 +48,39 @@ class FirestoreGuideService {
                         )
                 }
             }
+    }
+
+    fun observeUserBookmarkPostIds(userId: String): Flow<List<String>> {
+        return Firebase.firestore
+            .collection("users")
+            .document(userId)
+            .collection("bookmarks")
+            .snapshots
+            .map { snapshot ->
+                snapshot.documents.map { document -> document.id }
+            }
+    }
+
+    suspend fun addBookmark(userId: String, postId: String) {
+        Firebase.firestore
+            .collection("users")
+            .document(userId)
+            .collection("bookmarks")
+            .document(postId)
+            .set(
+                Bookmark(
+                    postId = postId,
+                    createdAt = "",
+                )
+            )
+    }
+
+    suspend fun removeBookmark(userId: String, postId: String) {
+        Firebase.firestore
+            .collection("users")
+            .document(userId)
+            .collection("bookmarks")
+            .document(postId)
+            .delete()
     }
 }

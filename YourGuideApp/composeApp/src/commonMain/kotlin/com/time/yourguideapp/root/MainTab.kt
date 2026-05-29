@@ -8,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import chaintech.videoplayer.host.MediaPlayerHost
-import chaintech.videoplayer.ui.youtube.YouTubePlayerComposable
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.presentation.category.CategoryScreen
 import com.time.yourguideapp.presentation.detail.DetailScreen
+import com.time.yourguideapp.presentation.explore.ExploreScreen
+import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.HomeScreen
+import com.time.yourguideapp.presentation.love.LoveScreen
+import com.time.yourguideapp.presentation.state.UIState
 
 sealed class MainTab(
     private val index: UShort,
@@ -39,7 +41,7 @@ sealed class MainTab(
                     Home -> Icons.Outlined.Home
                     Explore -> Icons.Outlined.Explore
                     Category -> Icons.Outlined.Menu
-                    else -> Icons.Outlined.Save
+                    else -> Icons.Outlined.Favorite
                 }
             )
 
@@ -65,13 +67,20 @@ sealed class MainTab(
                 onOpenDetail = { data, lables ->
                     rootNavigator.push(DetailScreen(data, lables))
                 },
-                onOpenCategory = { label, list ->
-                    rootNavigator.push(CategoryScreen(label, list, onClickBack = {
+                onOpenCategory = { label, list , listLabel->
+
+                    rootNavigator.push(CategoryScreen(label, list,
+                        listLabel ,
+                        onClickBack = {
                         rootNavigator.pop()
+
                     }, onOpenDetail = { data, labels ->
                         rootNavigator.push(DetailScreen(data, labels))
                     }))
-                }
+                },
+                onToggleLove = { post ->
+                    viewModel.toggleBookmark(post.idPost)
+                },
             )
         }
     }
@@ -79,19 +88,7 @@ sealed class MainTab(
     data object Explore : MainTab(index = 1u, title = "Explore") {
         @Composable
         override fun Content() {
-            val playerHost = remember { MediaPlayerHost(mediaUrl = "QFxN2oDKk0E") }
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-
-                YouTubePlayerComposable(
-                    modifier = Modifier.wrapContentSize(),
-                    playerHost = playerHost
-                )
-            }
+            ExploreScreen()
         }
     }
 
@@ -106,7 +103,23 @@ sealed class MainTab(
     data object Loves: MainTab(index = 3u, title = "Loves"){
         @Composable
         override fun Content() {
-            Text("Loves")
+            val viewModel = LocalMainViewModel.current
+            val rootNavigator = LocalRootNavigator.current
+            val state by viewModel.state.collectAsState()
+            val homeData = (state as? UIState.Success<*>)?.data as? HomeData
+            val labels = homeData?.labels.orEmpty()
+            val lovedPosts = homeData?.posts
+                ?.filter { post -> homeData.bookmarkPostIds.contains(post.idPost) }
+                .orEmpty()
+
+            LoveScreen(
+                lovedPosts = lovedPosts,
+                labels = labels,
+                rootNavigator = rootNavigator,
+                onToggleLove = { post ->
+                    viewModel.toggleBookmark(post.idPost)
+                },
+            )
         }
 
     }

@@ -48,7 +48,8 @@ fun HomeScreen(
     state: UIState,
     onReload: () -> Unit,
     onOpenDetail: (Posts, List<Label>) -> Unit,
-    onOpenCategory:  (Label, List<Posts>) -> Unit,
+    onOpenCategory:  (Label, List<Posts>, List<Label>) -> Unit,
+    onToggleLove: (Posts) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -86,7 +87,7 @@ fun HomeScreen(
                                 items(data.labels) { label ->
                                     Box(modifier= Modifier.padding(horizontal = 10.dp)
                                         .clickable{
-                                            onOpenCategory(label,data.posts)
+                                            onOpenCategory(label,data.posts, data.labels)
                                         }
                                     ){
                                         Row(
@@ -125,7 +126,9 @@ fun HomeScreen(
                                 .padding(vertical = 10.dp)
                                 .clickable{
                                     onOpenDetail(item, data.labels)
-                                }
+                                },
+                                isLoved = data.bookmarkPostIds.contains(item.idPost),
+                                onToggleLove = { onToggleLove(item) },
                             )
                         }
 
@@ -177,7 +180,8 @@ fun HomeViewPreview() {
                 onOpenDetail ={ data, lablel ->
 
                 },
-                onOpenCategory = {lable, post-> },
+                onOpenCategory = {lable, post, lables -> },
+                onToggleLove = {},
                 modifier = Modifier
             )
         }

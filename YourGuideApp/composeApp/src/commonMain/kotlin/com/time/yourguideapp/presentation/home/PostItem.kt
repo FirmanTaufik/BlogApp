@@ -14,9 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +41,13 @@ import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 
 @Composable
-fun PostItem(posts: Posts, label :String,modifier: Modifier) {
+fun PostItem(
+    posts: Posts,
+    label: String,
+    modifier: Modifier,
+    isLoved: Boolean = false,
+    onToggleLove: () -> Unit = {},
+) {
     val title = posts.getCurrentLocaleData().title
     val description = posts.getCurrentLocaleData().content
     Row(
@@ -90,13 +95,13 @@ fun PostItem(posts: Posts, label :String,modifier: Modifier) {
                     )
                 }
 
-                IconButton(onClick = {
-
-                }) {
+                IconButton(onClick = onToggleLove) {
                     Icon(
-                        painter = rememberVectorPainter(Icons.Outlined.BookmarkBorder),
+                        painter = rememberVectorPainter(
+                            if (isLoved) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+                        ),
                         contentDescription = null,
-                        tint = AppColors.blue123060
+                        tint = if (isLoved) Color(0xFFE94B6A) else AppColors.blue123060
                     )
                 }
 

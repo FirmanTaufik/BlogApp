@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,22 +26,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
+import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.PostItem
 import com.time.yourguideapp.presentation.state.UIState
 import org.koin.compose.viewmodel.koinViewModel
 
 class CategoryScreen(val label : Label, val data : List<Posts>,
+                     val listLabel: List<Label>,
                      val  onClickBack :() -> Unit,
     val onOpenDetail : (Posts, List<Label>)-> Unit) : Screen {
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val viewModel = koinViewModel<CategoryViewModel>()
+        val mainViewModel = LocalMainViewModel.current
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val mainState by mainViewModel.state.collectAsState()
+        val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
+            ?.bookmarkPostIds
+            .orEmpty()
+
         LaunchedEffect(Unit){
             viewModel.getListByLabel(label, data)
         }
@@ -74,8 +85,10 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
                                 PostItem(item, labelName, Modifier.fillMaxWidth()
                                     .padding(vertical = 10.dp)
                                     .clickable{
-                                       // onOpenDetail(item, "label")
-                                    }
+                                        onOpenDetail(item, listLabel)
+                                    },
+                                    isLoved = bookmarkPostIds.contains(item.idPost),
+                                    onToggleLove = { mainViewModel.toggleBookmark(item.idPost) },
                                 )
                             }
                         }
