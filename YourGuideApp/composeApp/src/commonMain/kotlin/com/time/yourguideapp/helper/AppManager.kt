@@ -1,5 +1,9 @@
 package com.time.yourguideapp.helper
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 object AppManager {
-    val currentLanguage  = "id"
+    var currentLanguage by mutableStateOf("id")
 }

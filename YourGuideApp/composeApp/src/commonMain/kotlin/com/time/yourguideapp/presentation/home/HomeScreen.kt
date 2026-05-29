@@ -1,6 +1,7 @@
 package com.time.yourguideapp.presentation.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.category.CategoryScreen
 import com.time.yourguideapp.presentation.component.BannerSlider
+import com.time.yourguideapp.presentation.weather.WeatherLoadingCard
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import com.time.yourguideapp.presentation.state.UIState
 
@@ -60,8 +62,7 @@ fun HomeScreen(
     ) {
         when (state) {
             UIState.Loading -> {
-                CircularProgressIndicator()
-                Text("Memuat data dari MainViewModel...")
+                HomeLoadingSkeleton()
             }
 
             is UIState.Success<*> -> {
@@ -148,6 +149,106 @@ fun HomeScreen(
             }
         }
 
+    }
+}
+
+@Composable
+private fun HomeLoadingSkeleton() {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(10.dp),
+    ) {
+        item {
+            WeatherLoadingCard()
+            VerticalSpacer(20)
+        }
+        item {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                repeat(4) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.50f)),
+                    )
+                }
+            }
+            VerticalSpacer(20)
+        }
+        items(3) {
+            HomePostSkeleton()
+        }
+    }
+}
+
+@Composable
+private fun HomePostSkeleton() {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .height(150.dp)
+            .background(Color.White.copy(alpha = 0.40f)),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .padding(5.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                .background(Color.White.copy(alpha = 0.50f)),
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(horizontal = 15.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 64.dp, height = 22.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.52f)),
+                )
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.52f)),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .height(18.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                    .background(Color.White.copy(alpha = 0.54f)),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .height(14.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                    .background(Color.White.copy(alpha = 0.48f)),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .height(14.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                    .background(Color.White.copy(alpha = 0.46f)),
+            )
+        }
     }
 }
 

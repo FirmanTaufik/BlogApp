@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,6 +27,7 @@ import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.HomeScreen
 import com.time.yourguideapp.presentation.love.LoveScreen
 import com.time.yourguideapp.presentation.state.UIState
+import com.time.yourguideapp.presentation.weather.WeatherScreen
 
 sealed class MainTab(
     private val index: UShort,
@@ -40,7 +40,7 @@ sealed class MainTab(
                 image = when (this) {
                     Home -> Icons.Outlined.Home
                     Explore -> Icons.Outlined.Explore
-                    Category -> Icons.Outlined.Menu
+                    Weather -> Icons.Outlined.WbSunny
                     else -> Icons.Outlined.Favorite
                 }
             )
@@ -92,10 +92,10 @@ sealed class MainTab(
         }
     }
 
-    data object Category: MainTab(index = 2u, title = "Category"){
+    data object Weather: MainTab(index = 2u, title = "Weather"){
         @Composable
         override fun Content() {
-             Text("Category")
+             WeatherScreen()
         }
     }
 

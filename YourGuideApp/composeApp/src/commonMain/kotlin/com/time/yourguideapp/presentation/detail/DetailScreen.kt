@@ -69,6 +69,8 @@ import com.time.yourguideapp.helper.Dummy
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
+import com.time.yourguideapp.presentation.ads.ANDROID_BANNER_AD_UNIT_ID
+import com.time.yourguideapp.presentation.ads.AdMobBanner
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
@@ -169,35 +171,41 @@ data class DetailScreen(
                 )
             },
             bottomBar = {
-                BottomAppBar(containerColor = Color.Transparent,) {
-                    Row (modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 15.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween){
-                        LazyRow(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.wrapContentWidth()
+                Column {
+                    BottomAppBar(containerColor = Color.Transparent,) {
+                        Row (modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 15.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween){
+                            LazyRow(
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier.wrapContentWidth()
+                                    .glassmorphism(CircleShape, widthBorder = 1, backgroundColor = Color.White.copy(alpha = 0.95f) ),
+                                contentPadding = PaddingValues(5.dp)
+                            ) {
+                                items(2) {
+                                    CustomItemBar("", rememberVectorPainter(Icons.Outlined.Map)) {
+
+                                    }
+                                }
+
+                            }
+                            Box( modifier = Modifier.wrapContentWidth()
+                                .padding(5.dp)
                                 .glassmorphism(CircleShape, widthBorder = 1, backgroundColor = Color.White.copy(alpha = 0.95f) ),
-                            contentPadding = PaddingValues(5.dp)
-                        ) {
-                            items(2) {
-                                CustomItemBar("", rememberVectorPainter(Icons.Outlined.Map)) {
+                            ){
+
+                                CustomItemBar("", rememberVectorPainter(Icons.Outlined.ArrowForwardIos)) {
 
                                 }
                             }
-
                         }
-                        Box( modifier = Modifier.wrapContentWidth()
-                            .padding(5.dp)
-                            .glassmorphism(CircleShape, widthBorder = 1, backgroundColor = Color.White.copy(alpha = 0.95f) ),
-                        ){
 
-                            CustomItemBar("", rememberVectorPainter(Icons.Outlined.ArrowForwardIos)) {
 
-                            }
-                        }
                     }
-
-
+                    AdMobBanner(
+                        modifier = Modifier.fillMaxWidth(),
+                        adUnitId = ANDROID_BANNER_AD_UNIT_ID,
+                    )
                 }
             }
         ) {

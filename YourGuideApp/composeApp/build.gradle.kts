@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.android)
+            implementation(libs.google.mobile.ads)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -46,6 +47,7 @@ kotlin {
             implementation(libs.firebase.firestore)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
+            implementation(libs.compose.shimmer)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

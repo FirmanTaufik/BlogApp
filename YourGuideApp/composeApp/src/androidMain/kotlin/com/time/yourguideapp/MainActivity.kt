@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import chaintech.videoplayer.util.PlaybackPreference
+import com.google.android.gms.ads.MobileAds
 import com.time.yourguideapp.helper.AppLogger
 
 class MainActivity : ComponentActivity() {
@@ -14,6 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         PlaybackPreference.initialize(this)
+        MobileAds.initialize(this)
         AppLogger.setUp(isDebug = BuildConfig.DEBUG)
         setContent {
             App()

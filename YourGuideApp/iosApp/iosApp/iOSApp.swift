@@ -8,6 +8,9 @@ import FirebaseCore
 #if canImport(GoogleSignIn)
 import GoogleSignIn
 #endif
+#if canImport(GoogleMobileAds)
+import GoogleMobileAds
+#endif
 import ComposeApp
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
@@ -20,6 +23,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         #endif
         #if canImport(GoogleSignIn)
         configureGoogleSignIn()
+        #endif
+        #if canImport(GoogleMobileAds)
+        MobileAds.shared.start()
         #endif
         return true
     }

@@ -95,7 +95,7 @@ data object RootScreen : Screen {
 
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Loves),
             searchPosts = posts,
             labels = labels,
             userName = currentUser?.displayName ?: "Traveler",
@@ -154,7 +154,7 @@ private fun RootContent(
 
                         IconButton(
                             onClick = {
-                              //  rootNavigator.push(ProfileScreen())
+                                rootNavigator.push(ProfileScreen())
                             },
                             modifier = Modifier.glassmorphism(CircleShape, backgroundColor = Color.White.copy(alpha = 0.30f))
                         ) {
@@ -313,7 +313,7 @@ private fun RootScreenPreview() {
     MaterialTheme {
         RootContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Category, MainTab.Explore, MainTab.Loves),
+            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Loves),
             searchPosts = emptyList(),
             labels = emptyList(),
             userName = "Traveler",
