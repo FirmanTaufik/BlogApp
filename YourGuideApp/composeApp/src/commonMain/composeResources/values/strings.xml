@@ -26,6 +26,8 @@
     <string name="about_subtitle">What this app is about</string>
     <string name="privacy_title">Privacy Policy</string>
     <string name="privacy_subtitle">How your data is handled</string>
+    <string name="profile_login_title">Log in</string>
+    <string name="profile_login_subtitle">Sign in to sync your account</string>
     <string name="logout_title">Logout</string>
     <string name="logout_subtitle">Sign out from this account</string>
 

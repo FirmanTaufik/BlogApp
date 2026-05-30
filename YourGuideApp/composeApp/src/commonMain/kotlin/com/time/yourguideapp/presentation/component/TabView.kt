@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -20,6 +21,8 @@ import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.AppColors.blue4789d7
 import com.time.yourguideapp.AppColors.blueaad2fb
 import com.time.yourguideapp.helper.glassmorphism
+
+private val AuthTabTextColor = Color(0xFF123060)
 
 @Composable
 fun TabView(tabsList : List<String>,
@@ -58,7 +61,8 @@ fun TabView(tabsList : List<String>,
                         Text(
                             text = tab,
                             textAlign = TextAlign.Center,
-                            color = AppColors.white
+                            color = AuthTabTextColor,
+                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Medium
                         )
                     },
                 )

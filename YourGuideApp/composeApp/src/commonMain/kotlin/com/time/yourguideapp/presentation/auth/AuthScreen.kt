@@ -63,6 +63,8 @@ import dev.gitlive.firebase.auth.auth
 import org.jetbrains.compose.resources.stringResource
 import yourguideapp.composeapp.generated.resources.*
 
+private val AuthFieldLabelColor = Color(0xFF4B5563)
+private val AuthSecondaryTextColor = Color(0xFF667085)
 
 @Composable
 fun AuthScreen (
@@ -308,21 +310,21 @@ fun RegisterContent(modifier : Modifier) {
     Column {
     Column(modifier = Modifier.fillMaxWidth()
             .padding(20.dp)) {
-            Text(stringResource(Res.string.auth_name), color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_name), color = AuthFieldLabelColor)
             VerticalSpacer(10)
             InputView(leadingIcon = Icons.Default.AccountCircle, placeHolder = stringResource(Res.string.auth_enter_name),
                 input = name) {
                 name = it
             }
             VerticalSpacer(10)
-            Text(stringResource(Res.string.auth_email), color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_email), color = AuthFieldLabelColor)
             VerticalSpacer(10)
             InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
                 input = email) {
                 email = it
             }
             VerticalSpacer(30)
-            Text(stringResource(Res.string.auth_password), color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_password), color = AuthFieldLabelColor)
             VerticalSpacer(10)
             InputView(leadingIcon = Icons.Default.Password, placeHolder = stringResource(Res.string.auth_enter_password), isInputTypePassword = true,
                 input = password) {
@@ -346,7 +348,7 @@ fun RegisterContent(modifier : Modifier) {
                 HorizontalDivider(modifier = Modifier.weight(1f))
                 Text(stringResource(Res.string.auth_or_sign_up_with),
                     modifier = Modifier.padding(horizontal = 10.dp),
-                    color = Color.Gray.copy(alpha = 0.5f))
+                    color = AuthSecondaryTextColor)
                 HorizontalDivider(modifier = Modifier.weight(1f))
 
             }
@@ -361,14 +363,14 @@ private fun LoginContent(modifier: Modifier){
     var password by remember { mutableStateOf("") }
     Column(modifier = modifier.fillMaxWidth()
         .padding(20.dp)) {
-        Text(stringResource(Res.string.auth_email), color = Color.Black.copy(alpha = 0.5f))
+        Text(stringResource(Res.string.auth_email), color = AuthFieldLabelColor)
         VerticalSpacer(10)
         InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
             input = email) {
             email = it
         }
         VerticalSpacer(30)
-        Text(stringResource(Res.string.auth_password), color = Color.Black.copy(alpha = 0.5f))
+        Text(stringResource(Res.string.auth_password), color = AuthFieldLabelColor)
         VerticalSpacer(10)
         InputView(leadingIcon = Icons.Default.Password, placeHolder = stringResource(Res.string.auth_enter_password), isInputTypePassword = true,
             input = password) {
@@ -378,7 +380,7 @@ private fun LoginContent(modifier: Modifier){
         VerticalSpacer(10)
         Row (modifier = Modifier.fillMaxWidth()){
             Spacer(Modifier.weight(1f))
-            Text(stringResource(Res.string.auth_forgot_password), color = Color.Black.copy(alpha = 0.5f))
+            Text(stringResource(Res.string.auth_forgot_password), color = AuthSecondaryTextColor)
 
         }
         VerticalSpacer(25)
@@ -397,7 +399,7 @@ private fun LoginContent(modifier: Modifier){
             HorizontalDivider(modifier = Modifier.weight(1f))
             Text(stringResource(Res.string.auth_or_log_in_with),
                 modifier = Modifier.padding(horizontal = 10.dp),
-                color = Color.Gray.copy(alpha = 0.5f))
+                color = AuthSecondaryTextColor)
             HorizontalDivider(modifier = Modifier.weight(1f))
         }
 

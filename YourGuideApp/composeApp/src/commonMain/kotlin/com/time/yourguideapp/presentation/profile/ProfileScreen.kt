@@ -77,6 +77,7 @@ class ProfileScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+        val isLoggedIn = currentUser != null
         val coroutineScope = rememberCoroutineScope()
         val shareApp = rememberShareAppLauncher()
         val appName = getAppName()
@@ -210,18 +211,33 @@ class ProfileScreen : Screen {
 
                     VerticalSpacer(18)
                     SectionTitle(stringResource(Res.string.section_account))
-                    AppSettingRow(
-                        icon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
-                                contentDescription = null,
-                                tint = Color(0xFFB3261E),
-                            )
-                        },
-                        title = stringResource(Res.string.logout_title),
-                        subtitle = stringResource(Res.string.logout_subtitle),
-                        onClick = { showLogoutDialog = true },
-                    )
+                    if (isLoggedIn) {
+                        AppSettingRow(
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                                    contentDescription = null,
+                                    tint = Color(0xFFB3261E),
+                                )
+                            },
+                            title = stringResource(Res.string.logout_title),
+                            subtitle = stringResource(Res.string.logout_subtitle),
+                            onClick = { showLogoutDialog = true },
+                        )
+                    } else {
+                        AppSettingRow(
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.AccountCircle,
+                                    contentDescription = null,
+                                    tint = AppColors.blue123060,
+                                )
+                            },
+                            title = stringResource(Res.string.profile_login_title),
+                            subtitle = stringResource(Res.string.profile_login_subtitle),
+                            onClick = { navigator.popUntilRoot() },
+                        )
+                    }
                     VerticalSpacer(24)
                 }
             }
@@ -248,12 +264,14 @@ class ProfileScreen : Screen {
             )
         }
 
-        if (showLogoutDialog) {
+        if (showLogoutDialog && isLoggedIn) {
             LogoutDialog(
                 onConfirm = {
                     showLogoutDialog = false
-                    coroutineScope.launch { Firebase.auth.signOut() }
-                    navigator.popUntilRoot()
+                    coroutineScope.launch {
+                        Firebase.auth.signOut()
+                        navigator.popUntilRoot()
+                    }
                 },
                 onDismiss = { showLogoutDialog = false },
             )

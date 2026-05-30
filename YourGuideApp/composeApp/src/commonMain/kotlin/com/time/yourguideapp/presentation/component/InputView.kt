@@ -59,6 +59,10 @@ import com.time.yourguideapp.helper.glassmorphism
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 
+private val InputTextColor = Color(0xFF111827)
+private val InputPlaceholderColor = Color(0xFF6B7280)
+private val InputIconColor = Color(0xFF6B7280)
+
 @Composable
 fun InputView(input : String,
               placeHolder : String,
@@ -84,20 +88,25 @@ fun InputView(input : String,
             focusedContainerColor = AppColors.white,
             unfocusedContainerColor = AppColors.white,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = InputTextColor,
+            unfocusedTextColor = InputTextColor,
+            cursorColor = AppColors.blue4789d7,
+            focusedLabelColor = InputPlaceholderColor,
+            unfocusedLabelColor = InputPlaceholderColor
         ),
         placeholder = {
-            Text(text = placeHolder, color = AppColors.white)
+            Text(text = placeHolder, color = InputPlaceholderColor)
         },
         label = {
-            Text(text = placeHolder, color = Color.Gray.copy(alpha = 0.5f))
+            Text(text = placeHolder, color = InputPlaceholderColor)
 
         },
         leadingIcon = {
             Icon(
                 imageVector =  leadingIcon,
                 contentDescription = null,
-                tint = Color.Gray.copy(alpha = 0.5f)
+                tint = InputIconColor
             )
         },
         trailingIcon = {
@@ -108,7 +117,7 @@ fun InputView(input : String,
                     Icon(imageVector =  if (passwordVisible) Icons.Default.Visibility
                     else Icons.Default.VisibilityOff,
                         contentDescription = null,
-                        tint = Color.Gray.copy(alpha = 0.5f))
+                        tint = InputIconColor)
                 }
             }else {
 
@@ -117,7 +126,7 @@ fun InputView(input : String,
                     Icon(
                         imageVector =  trailingIcon,
                         contentDescription = null,
-                        tint = Color.Gray.copy(alpha = 0.5f)
+                        tint = InputIconColor
                     )
 
                 }

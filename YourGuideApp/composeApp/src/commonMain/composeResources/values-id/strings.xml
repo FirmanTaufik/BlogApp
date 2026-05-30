@@ -26,6 +26,8 @@
     <string name="about_subtitle">Apa isi aplikasi ini</string>
     <string name="privacy_title">Kebijakan Privasi</string>
     <string name="privacy_subtitle">Bagaimana data Anda diproses</string>
+    <string name="profile_login_title">Masuk</string>
+    <string name="profile_login_subtitle">Masuk untuk menyinkronkan akun Anda</string>
     <string name="logout_title">Keluar</string>
     <string name="logout_subtitle">Keluar dari akun ini</string>
 
