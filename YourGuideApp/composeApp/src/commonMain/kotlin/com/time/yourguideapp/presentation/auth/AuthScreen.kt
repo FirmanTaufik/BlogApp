@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,15 +42,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.screen.Screen
 import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
-import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mmk.kmpauth.uihelper.apple.AppleSignInButton
 import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.AppColors.blue123060
 import com.time.yourguideapp.AppColors.blue4789d7
-import com.time.yourguideapp.auth.GoogleSignInConfig
 import com.time.yourguideapp.core.platform.getAppName
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
@@ -57,50 +57,64 @@ import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.InputView
 import com.time.yourguideapp.presentation.component.TabView
 import com.time.yourguideapp.presentation.component.VerticalSpacer
-import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseUser
-import dev.gitlive.firebase.auth.auth
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import yourguideapp.composeapp.generated.resources.*
 
 private val AuthFieldLabelColor = Color(0xFF4B5563)
 private val AuthSecondaryTextColor = Color(0xFF667085)
 
 @Composable
-fun AuthScreen (
+fun AuthRoute(
     modifier: Modifier = Modifier,
+    viewModel: AuthViewModel = koinViewModel(),
     onLoginSuccess: (FirebaseUser) -> Unit = {},
-   onSkipLogin : () -> Unit
+    onSkipLogin: () -> Unit,
 ) {
-
-    val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
-    LaunchedEffect(currentUser){
-        if (currentUser!=null){
-            onSkipLogin()
-        }
-    }
-
-    var isLoading by remember { mutableStateOf(false) }
-    var resultErrorMessage by remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
     val googleWebClientMissingMessage = stringResource(Res.string.auth_google_web_client_missing)
     val googleUserEmptyMessage = stringResource(Res.string.auth_google_user_empty)
     val googleLoginFailedIdTokenMessage = stringResource(Res.string.auth_google_login_failed_idtoken)
     val googleLoginFailedFallbackMessage = stringResource(Res.string.auth_google_login_failed_fallback)
     val googleLoginFailedUnknownTemplate = stringResource(Res.string.auth_google_login_failed_unknown)
+    val resultErrorMessage = uiState.loginError?.toMessage(
+        googleWebClientMissingMessage = googleWebClientMissingMessage,
+        googleUserEmptyMessage = googleUserEmptyMessage,
+        googleLoginFailedIdTokenMessage = googleLoginFailedIdTokenMessage,
+        googleLoginFailedFallbackMessage = googleLoginFailedFallbackMessage,
+        googleLoginFailedUnknownTemplate = googleLoginFailedUnknownTemplate,
+    )
 
-    val googleAuthProviderResult = remember {
-        if (GoogleSignInConfig.isConfigured) {
-            runCatching {
-                GoogleAuthProvider.create(
-                    credentials = GoogleAuthCredentials(serverId = GoogleSignInConfig.WEB_CLIENT_ID)
-                )
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is AuthEvent.LoginSuccess -> onLoginSuccess(event.user)
             }
-        } else {
-            Result.failure(IllegalStateException(googleWebClientMissingMessage))
         }
     }
-    val configurationErrorMessage = googleAuthProviderResult.exceptionOrNull()?.message
 
+    AuthScreen(
+        modifier = modifier,
+        uiState = uiState,
+        resultErrorMessage = resultErrorMessage,
+        onSkipLogin = onSkipLogin,
+        onGoogleLoginStarted = viewModel::onGoogleLoginStarted,
+        onGoogleLoginResult = viewModel::onGoogleLoginResult,
+        onGoogleLoginConfigurationError = viewModel::onGoogleLoginConfigurationError,
+    )
+}
+
+@Composable
+fun AuthScreen(
+    modifier: Modifier = Modifier,
+    uiState: AuthUiState,
+    resultErrorMessage: String?,
+    onSkipLogin: () -> Unit,
+    onGoogleLoginStarted: () -> Unit,
+    onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
+    onGoogleLoginConfigurationError: () -> Unit,
+) {
     Scaffold(
     modifier = modifier
     .fillMaxSize()
@@ -119,35 +133,13 @@ fun AuthScreen (
                 Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                googleAuthProviderResult = googleAuthProviderResult,
-                googleConfigurationErrorMessage = configurationErrorMessage,
-                isGoogleLoginLoading = isLoading,
-                onGoogleLoginStarted = {
-                    isLoading = true
-                    resultErrorMessage = null
-                },
-                onGoogleLoginResult = { result ->
-                    isLoading = false
-                    result
-                        .onSuccess { user ->
-                            if (user == null) {
-                                resultErrorMessage = googleUserEmptyMessage
-                            } else {
-                                resultErrorMessage = null
-                                onLoginSuccess(user)
-                            }
-                        }
-                        .onFailure { throwable ->
-                            resultErrorMessage = throwable.toGoogleLoginMessage(
-                                idTokenMessage = googleLoginFailedIdTokenMessage,
-                                fallbackMessage = googleLoginFailedFallbackMessage,
-                                unknownTemplate = googleLoginFailedUnknownTemplate,
-                            )
-                        }
-                },
-                onGoogleLoginConfigurationError = {
-                    resultErrorMessage = configurationErrorMessage
-                }
+                googleAuthProviderResult = uiState.googleAuthProviderResult,
+                googleConfigurationErrorMessage = uiState.googleAuthProviderResult.exceptionOrNull()?.message,
+                isGoogleLoginLoading = uiState.isGoogleLoginLoading,
+                resultErrorMessage = resultErrorMessage,
+                onGoogleLoginStarted = onGoogleLoginStarted,
+                onGoogleLoginResult = onGoogleLoginResult,
+                onGoogleLoginConfigurationError = onGoogleLoginConfigurationError,
             )
         }
     }
@@ -170,7 +162,7 @@ private fun ContentHeader(onSkipLogin: () -> Unit) {
             Text(
                 appName, fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
-                color = AppColors.white,
+                color = blue4789d7,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -203,6 +195,7 @@ private fun ContentAuth(
     googleAuthProviderResult: Result<GoogleAuthProvider>,
     googleConfigurationErrorMessage: String?,
     isGoogleLoginLoading: Boolean,
+    resultErrorMessage: String?,
     onGoogleLoginStarted: () -> Unit,
     onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
@@ -211,7 +204,7 @@ private fun ContentAuth(
         stringResource(Res.string.auth_login_tab),
         stringResource(Res.string.auth_signup_tab),
     )
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(1) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     Card(
         shape = RoundedCornerShape(topEnd = 40.dp, topStart = 40.dp),
         modifier = modifier.fillMaxSize(),
@@ -239,24 +232,27 @@ private fun ContentAuth(
             }
 
             VerticalSpacer(20)
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Column(
                 modifier = Modifier.fillMaxWidth()
+                    .wrapContentHeight()
                     .padding(horizontal = 20.dp)) {
+
                 AppleSignInButton (text = stringResource(Res.string.auth_apple_button),
-                    modifier = Modifier.weight(1f) ){
+                    modifier = Modifier.fillMaxWidth() ){
 
                 }
-                HorizontalSpacer(10)
+                VerticalSpacer(10)
                 if (googleAuthProviderResult.isSuccess) {
                     GoogleButtonUiContainerFirebase(
                         linkAccount = false,
                         filterByAuthorizedAccounts = false,
-                        onResult = onGoogleLoginResult
+                        onResult = onGoogleLoginResult,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         GoogleSignInButton (text = stringResource(Res.string.auth_google_button),
                             modifier = Modifier
                                 .glassmorphism()
-                                .weight(1f)
+                                .fillMaxWidth(1f)
                                 .height(50.dp),
                             shape = RoundedCornerShape(50)) {
                             if (!isGoogleLoginLoading) {
@@ -269,14 +265,24 @@ private fun ContentAuth(
                     GoogleSignInButton (text = stringResource(Res.string.auth_google_button),
                         modifier = Modifier
                             .glassmorphism()
-                            .weight(1f)
-                            .height(50.dp),
+                            .fillMaxWidth() ,
                         shape = RoundedCornerShape(50)) {
                         if (googleConfigurationErrorMessage != null) {
                             onGoogleLoginConfigurationError()
                         }
                     }
                 }
+
+                VerticalSpacer(20)
+            }
+
+            if (!resultErrorMessage.isNullOrBlank()) {
+                VerticalSpacer(12)
+                Text(
+                    text = resultErrorMessage,
+                    color = Color(0xFFB3261E),
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
             }
 
         }
@@ -285,19 +291,22 @@ private fun ContentAuth(
     }
 }
 
-private fun Throwable.toGoogleLoginMessage(
-    idTokenMessage: String,
-    fallbackMessage: String,
-    unknownTemplate: String,
+private fun AuthLoginError.toMessage(
+    googleWebClientMissingMessage: String,
+    googleUserEmptyMessage: String,
+    googleLoginFailedIdTokenMessage: String,
+    googleLoginFailedFallbackMessage: String,
+    googleLoginFailedUnknownTemplate: String,
 ): String {
-    val rawMessage = message.orEmpty()
-    return when {
-        rawMessage.contains("idtoken is null", ignoreCase = true) ||
-            rawMessage.contains("id token is null", ignoreCase = true) -> {
-            idTokenMessage
-        }
-        rawMessage.isNotBlank() -> rawMessage
-        else -> unknownTemplate.replace("%1\$s", this::class.simpleName ?: fallbackMessage)
+    return when (this) {
+        AuthLoginError.GoogleUserEmpty -> googleUserEmptyMessage
+        AuthLoginError.IdTokenEmpty -> googleLoginFailedIdTokenMessage
+        is AuthLoginError.Raw -> message
+        is AuthLoginError.Unknown -> googleLoginFailedUnknownTemplate.replace(
+            "%1\$s",
+            className ?: googleLoginFailedFallbackMessage,
+        )
+        is AuthLoginError.Configuration -> message ?: googleWebClientMissingMessage
     }
 }
 
@@ -411,8 +420,15 @@ private fun LoginContent(modifier: Modifier){
 @Preview(showSystemUi = true, showBackground = true)
 fun AuthScreenPreview() {
     MaterialTheme {
-        AuthScreen(){
-
-        }
+        AuthScreen(
+            uiState = AuthUiState(
+                googleAuthProviderResult = Result.failure(IllegalStateException()),
+            ),
+            resultErrorMessage = null,
+            onSkipLogin = {},
+            onGoogleLoginStarted = {},
+            onGoogleLoginResult = {},
+            onGoogleLoginConfigurationError = {},
+        )
     }
 }

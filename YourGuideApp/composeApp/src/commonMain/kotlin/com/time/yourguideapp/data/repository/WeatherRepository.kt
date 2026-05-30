@@ -48,7 +48,7 @@ class WeatherRepository(
 }
 
 private fun String.currentNumber(field: String): Double {
-    val currentBlock = Regex(""""current"\s*:\s*\{([^}]*)}""")
+    val currentBlock = Regex(""""current"\s*:\s*\{([^}]*)\}""")
         .find(this)
         ?.groupValues
         ?.get(1)
@@ -63,7 +63,10 @@ private fun String.currentNumber(field: String): Double {
 }
 
 private fun String.numberArray(field: String): List<Double> {
-    val dailyBlock = Regex(""""daily"\s*:\s*\{([\s\S]*?)}""")
+    val dailyBlock = Regex(
+        pattern = """"daily"\s*:\s*\{(.*?)\}""",
+        option = RegexOption.DOT_MATCHES_ALL,
+    )
         .find(this)
         ?.groupValues
         ?.get(1)
@@ -81,7 +84,10 @@ private fun String.numberArray(field: String): List<Double> {
 }
 
 private fun String.stringArray(field: String): List<String> {
-    val dailyBlock = Regex(""""daily"\s*:\s*\{([\s\S]*?)}""")
+    val dailyBlock = Regex(
+        pattern = """"daily"\s*:\s*\{(.*?)\}""",
+        option = RegexOption.DOT_MATCHES_ALL,
+    )
         .find(this)
         ?.groupValues
         ?.get(1)

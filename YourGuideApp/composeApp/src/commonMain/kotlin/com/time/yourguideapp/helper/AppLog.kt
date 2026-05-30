@@ -4,8 +4,12 @@ import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 
 object AppLogger {
+    var isDebugEnabled: Boolean = false
+        private set
+
     // Fungsi untuk inisialisasi awal (dipanggil dari iOS & Android)
     fun setUp(isDebug: Boolean) {
+        isDebugEnabled = isDebug
         if (isDebug) {
             Napier.base(DebugAntilog())
         }
