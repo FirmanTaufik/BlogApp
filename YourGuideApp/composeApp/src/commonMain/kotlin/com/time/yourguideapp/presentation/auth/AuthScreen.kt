@@ -1,13 +1,9 @@
 package com.time.yourguideapp.presentation.auth
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,27 +15,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.SafetyCheck
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.SecurityUpdate
-import androidx.compose.material.icons.filled.SystemSecurityUpdateWarning
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,16 +34,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
+import cafe.adriel.voyager.core.screen.Screen
 import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
 import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
@@ -65,7 +48,6 @@ import com.mmk.kmpauth.uihelper.apple.AppleSignInButton
 import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.AppColors.blue4789d7
-import com.time.yourguideapp.AppColors.blueaad2fb
 import com.time.yourguideapp.auth.GoogleSignInConfig
 import com.time.yourguideapp.core.platform.getAppName
 import com.time.yourguideapp.helper.glassmorphism
@@ -75,15 +57,26 @@ import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.InputView
 import com.time.yourguideapp.presentation.component.TabView
 import com.time.yourguideapp.presentation.component.VerticalSpacer
+import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseUser
+import dev.gitlive.firebase.auth.auth
 import org.jetbrains.compose.resources.stringResource
 import yourguideapp.composeapp.generated.resources.*
 
+
 @Composable
-fun AuthScreen(
+fun AuthScreen (
     modifier: Modifier = Modifier,
     onLoginSuccess: (FirebaseUser) -> Unit = {},
+   onSkipLogin : () -> Unit
 ) {
+
+    val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+    LaunchedEffect(currentUser){
+        if (currentUser!=null){
+            onSkipLogin()
+        }
+    }
 
     var isLoading by remember { mutableStateOf(false) }
     var resultErrorMessage by remember { mutableStateOf<String?>(null) }
@@ -107,10 +100,10 @@ fun AuthScreen(
     val configurationErrorMessage = googleAuthProviderResult.exceptionOrNull()?.message
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .rootBackground(),
-        containerColor = Color.Transparent
+    modifier = modifier
+    .fillMaxSize()
+    .rootBackground(),
+    containerColor = Color.Transparent
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -118,7 +111,7 @@ fun AuthScreen(
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             VerticalSpacer(20)
-            ContentHeader()
+            ContentHeader(onSkipLogin)
             VerticalSpacer(20)
             ContentAuth(
                 Modifier
@@ -159,7 +152,7 @@ fun AuthScreen(
 }
 
 @Composable
-private fun ContentHeader() {
+private fun ContentHeader(onSkipLogin: () -> Unit) {
     val appName = getAppName()
     val title = stringResource(Res.string.auth_enter_your_space)
     val description = stringResource(Res.string.auth_description)
@@ -181,7 +174,7 @@ private fun ContentHeader() {
             )
 
             ButtonView(text = stringResource(Res.string.common_skip), roundShape = 50) {
-
+                onSkipLogin()
             }
 
         }
@@ -416,6 +409,8 @@ private fun LoginContent(modifier: Modifier){
 @Preview(showSystemUi = true, showBackground = true)
 fun AuthScreenPreview() {
     MaterialTheme {
-        AuthScreen()
+        AuthScreen(){
+
+        }
     }
 }

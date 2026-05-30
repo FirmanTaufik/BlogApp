@@ -253,6 +253,7 @@ class ProfileScreen : Screen {
                 onConfirm = {
                     showLogoutDialog = false
                     coroutineScope.launch { Firebase.auth.signOut() }
+                    navigator.popUntilRoot()
                 },
                 onDismiss = { showLogoutDialog = false },
             )

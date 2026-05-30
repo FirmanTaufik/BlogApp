@@ -3,9 +3,12 @@ package com.time.yourguideapp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,11 +21,14 @@ import com.time.yourguideapp.di.appModule
 import com.time.yourguideapp.di.platformModule
 import com.time.yourguideapp.helper.ProvideAppLanguage
 import com.time.yourguideapp.presentation.auth.AuthScreen
+import com.time.yourguideapp.presentation.home.HomeScreen
 import com.time.yourguideapp.presentation.login.LoginScreen
 import com.time.yourguideapp.presentation.main.MainViewModel
+import com.time.yourguideapp.presentation.splash.SplashScreen
 import com.time.yourguideapp.root.RootScreen
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import kotlinx.coroutines.delay
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.KoinApplication
@@ -48,11 +54,16 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
     }), content = {
         ProvideAppLanguage {
             MaterialTheme {
-                val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+                var showSplash by remember { mutableStateOf(true) }
 
-                if (currentUser == null) {
-                    AuthScreen(modifier = Modifier)
-                } else {
+                LaunchedEffect(Unit) {
+                    delay(2200)
+                    showSplash = false
+                }
+
+                if (showSplash) {
+                    SplashScreen()
+                }  else {
                     val viewModel = koinViewModel<MainViewModel>()
 
                     CompositionLocalProvider(LocalMainViewModel provides viewModel) {
