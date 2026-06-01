@@ -136,7 +136,7 @@ private fun ExploreReelPage(
         MediaPlayerHost(
             mediaUrl = video.youtubeId,
             autoPlay = false,
-            isMuted = true,
+            isMuted = false,
             isLooping = true,
         )
     }
