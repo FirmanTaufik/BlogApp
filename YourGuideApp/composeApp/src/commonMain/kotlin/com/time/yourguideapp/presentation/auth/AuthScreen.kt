@@ -42,8 +42,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mmk.kmpauth.firebase.google.GoogleButtonUiContainerFirebase
+import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mmk.kmpauth.google.GoogleAuthProvider
+import com.mmk.kmpauth.google.GoogleUser
 import com.mmk.kmpauth.uihelper.apple.AppleSignInButton
 import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import com.time.yourguideapp.AppColors
@@ -112,7 +113,7 @@ fun AuthScreen(
     resultErrorMessage: String?,
     onSkipLogin: () -> Unit,
     onGoogleLoginStarted: () -> Unit,
-    onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
+    onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
 ) {
     Scaffold(
@@ -197,7 +198,7 @@ private fun ContentAuth(
     isGoogleLoginLoading: Boolean,
     resultErrorMessage: String?,
     onGoogleLoginStarted: () -> Unit,
-    onGoogleLoginResult: (Result<FirebaseUser?>) -> Unit,
+    onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
 ) {
     val tabsList = listOf(
@@ -243,10 +244,9 @@ private fun ContentAuth(
                 }
                 VerticalSpacer(10)
                 if (googleAuthProviderResult.isSuccess) {
-                    GoogleButtonUiContainerFirebase(
-                        linkAccount = false,
+                    GoogleButtonUiContainer(
                         filterByAuthorizedAccounts = false,
-                        onResult = onGoogleLoginResult,
+                        onGoogleSignInResult = onGoogleLoginResult,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         GoogleSignInButton (text = stringResource(Res.string.auth_google_button),

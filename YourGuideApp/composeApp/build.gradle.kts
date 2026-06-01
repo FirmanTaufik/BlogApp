@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.datastore)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
             implementation(libs.ktor.client.logging)
             implementation(libs.coil.compose)

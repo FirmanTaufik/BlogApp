@@ -3,6 +3,7 @@ package com.time.yourguideapp.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.time.yourguideapp.data.repository.MainRepository
+import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.state.UIState
 import dev.gitlive.firebase.Firebase
@@ -32,14 +33,14 @@ class MainViewModel(
         observeJob?.cancel()
         observeJob = viewModelScope.launch {
             _state.value = UIState.Loading
-            repository.observeHomeState(Firebase.auth.currentUser?.uid).collect { state ->
+            repository.observeHomeState(currentUserId()).collect { state ->
                 _state.value = state
             }
         }
     }
 
     fun toggleBookmark(postId: String) {
-        val userId = Firebase.auth.currentUser?.uid ?: return
+        val userId = currentUserId() ?: return
         val currentData = (_state.value as? UIState.Success<*>)?.data as? HomeData ?: return
 
         viewModelScope.launch {
@@ -49,5 +50,9 @@ class MainViewModel(
                 repository.addBookmark(userId, postId)
             }
         }
+    }
+
+    private fun currentUserId(): String? {
+        return Firebase.auth.currentUser?.uid ?: AppManager.currentUserProfile?.uuid
     }
 }

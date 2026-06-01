@@ -77,21 +77,29 @@ class ProfileScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
-        val isLoggedIn = currentUser != null
         val coroutineScope = rememberCoroutineScope()
         val shareApp = rememberShareAppLauncher()
         val appName = getAppName()
         val appVersion = getAppVersion()
         val platformName = getPlatform().name
         val selectedLanguage = AppManager.currentLanguage
+        val savedUserProfile = AppManager.currentUserProfile
         val selectedLanguageLabel = if (selectedLanguage == "id") {
             stringResource(Res.string.language_indonesian)
         } else {
             stringResource(Res.string.language_english)
         }
-        val userName = currentUser?.displayName ?: stringResource(Res.string.default_display_name)
-        val userEmail = currentUser?.email ?: currentUser?.uid.orEmpty()
+        val userName = currentUser?.displayName
+            ?: savedUserProfile?.name?.takeIf { it.isNotBlank() }
+            ?: stringResource(Res.string.default_display_name)
+        val userEmail = currentUser?.email
+            ?: savedUserProfile?.email?.takeIf { it.isNotBlank() }
+            ?: currentUser?.uid
+            ?: savedUserProfile?.uuid.orEmpty()
         val userPhotoUrl = currentUser?.photoURL
+            ?: savedUserProfile?.photoUrl?.takeIf { it.isNotBlank() }
+        val hasLocalUserProfile = savedUserProfile != null
+        val isLoggedIn = currentUser != null || hasLocalUserProfile
         val shareMessage = stringResource(Res.string.share_app_message)
 
         var showLogoutDialog by remember { mutableStateOf(false) }
@@ -269,7 +277,7 @@ class ProfileScreen : Screen {
                 onConfirm = {
                     showLogoutDialog = false
                     coroutineScope.launch {
-                        Firebase.auth.signOut()
+                        AppManager.clearUserProfile()
                         navigator.popUntilRoot()
                     }
                 },

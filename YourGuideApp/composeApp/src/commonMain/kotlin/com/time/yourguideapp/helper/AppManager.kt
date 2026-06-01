@@ -8,7 +8,9 @@ object AppManager {
     private const val DEFAULT_LANGUAGE = "en"
 
     private var initialized = false
+    private var userProfileInitialized = false
     private var _currentLanguage by mutableStateOf(DEFAULT_LANGUAGE)
+    private var _currentUserProfile by mutableStateOf<UserProfile?>(null)
 
     var currentLanguage: String
         get() {
@@ -27,9 +29,50 @@ object AppManager {
         initialized = true
     }
 
+    val currentUserProfile: UserProfile?
+        get() {
+            ensureUserProfileInitialized()
+            return _currentUserProfile
+        }
+
+    fun initializeUserProfile() {
+        if (userProfileInitialized) return
+        _currentUserProfile = UserProfileStorage.loadUserProfile()
+        userProfileInitialized = true
+    }
+
+    fun saveUserProfile(
+        uuid: String,
+        email: String,
+        name: String,
+        photoUrl: String,
+    ) {
+        ensureUserProfileInitialized()
+        val profile = UserProfile(
+            uuid = uuid,
+            email = email,
+            name = name,
+            photoUrl = photoUrl,
+        )
+        _currentUserProfile = profile
+        UserProfileStorage.saveUserProfile(profile)
+    }
+
+    fun clearUserProfile() {
+        ensureUserProfileInitialized()
+        _currentUserProfile = null
+        UserProfileStorage.clearUserProfile()
+    }
+
     private fun ensureInitialized() {
         if (!initialized) {
             initializeLanguage()
+        }
+    }
+
+    private fun ensureUserProfileInitialized() {
+        if (!userProfileInitialized) {
+            initializeUserProfile()
         }
     }
 }

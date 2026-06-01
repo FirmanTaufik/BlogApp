@@ -93,15 +93,22 @@ data object MainScreen : Screen {
         val posts = ((state as? UIState.Success<*>)?.data as? HomeData)?.posts.orEmpty()
         val labels = ((state as? UIState.Success<*>)?.data as? HomeData)?.labels.orEmpty()
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
+        val savedUserProfile = AppManager.currentUserProfile
 
         MainContent(
             initialTab = MainTab.Home,
             tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
             searchPosts = posts,
             labels = labels,
-            userName = currentUser?.displayName ?: stringResource(Res.string.default_display_name),
-            userEmail = currentUser?.email ?: currentUser?.uid.orEmpty(),
-            userPhotoUrl = currentUser?.photoURL,
+            userName = currentUser?.displayName
+                ?: savedUserProfile?.name?.takeIf { it.isNotBlank() }
+                ?: stringResource(Res.string.default_display_name),
+            userEmail = currentUser?.email
+                ?: savedUserProfile?.email?.takeIf { it.isNotBlank() }
+                ?: currentUser?.uid
+                ?: savedUserProfile?.uuid.orEmpty(),
+            userPhotoUrl = currentUser?.photoURL
+                ?: savedUserProfile?.photoUrl?.takeIf { it.isNotBlank() },
         ) {
             CurrentTab()
         }
@@ -434,4 +441,3 @@ data object MainScreen : Screen {
     }
 
 }
-
