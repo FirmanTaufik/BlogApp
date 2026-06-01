@@ -140,7 +140,9 @@ fun InputView(input : String,
         visualTransformation = if (passwordVisible) {
             VisualTransformation.None
         } else {
-            PasswordVisualTransformation()
+            if (isInputTypePassword)
+                PasswordVisualTransformation()
+            else VisualTransformation.None
         },
         keyboardOptions = KeyboardOptions(
             keyboardType = if (isInputTypePassword) KeyboardType.Password else  KeyboardType.Text,

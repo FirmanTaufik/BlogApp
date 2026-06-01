@@ -66,6 +66,7 @@ import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.auth
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -275,8 +276,12 @@ class ProfileScreen : Screen {
         if (showLogoutDialog && isLoggedIn) {
             LogoutDialog(
                 onConfirm = {
+
                     showLogoutDialog = false
                     coroutineScope.launch {
+                        if (currentUser!=null) {
+                            Firebase.auth.signOut()
+                        }
                         AppManager.clearUserProfile()
                         navigator.popUntilRoot()
                     }

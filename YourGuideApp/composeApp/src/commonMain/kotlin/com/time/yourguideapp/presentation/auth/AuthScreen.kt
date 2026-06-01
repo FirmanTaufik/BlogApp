@@ -79,12 +79,16 @@ fun AuthRoute(
     val googleLoginFailedIdTokenMessage = stringResource(Res.string.auth_google_login_failed_idtoken)
     val googleLoginFailedFallbackMessage = stringResource(Res.string.auth_google_login_failed_fallback)
     val googleLoginFailedUnknownTemplate = stringResource(Res.string.auth_google_login_failed_unknown)
+    val emptyFieldsMessage = stringResource(Res.string.auth_empty_fields)
+    val weakPasswordMessage = stringResource(Res.string.auth_weak_password)
     val resultErrorMessage = uiState.loginError?.toMessage(
         googleWebClientMissingMessage = googleWebClientMissingMessage,
         googleUserEmptyMessage = googleUserEmptyMessage,
         googleLoginFailedIdTokenMessage = googleLoginFailedIdTokenMessage,
         googleLoginFailedFallbackMessage = googleLoginFailedFallbackMessage,
         googleLoginFailedUnknownTemplate = googleLoginFailedUnknownTemplate,
+        emptyFieldsMessage = emptyFieldsMessage,
+        weakPasswordMessage = weakPasswordMessage,
     )
 
     LaunchedEffect(viewModel) {
@@ -103,6 +107,8 @@ fun AuthRoute(
         onGoogleLoginStarted = viewModel::onGoogleLoginStarted,
         onGoogleLoginResult = viewModel::onGoogleLoginResult,
         onGoogleLoginConfigurationError = viewModel::onGoogleLoginConfigurationError,
+        onEmailLogin = viewModel::onEmailLogin,
+        onEmailRegister = viewModel::onEmailRegister,
     )
 }
 
@@ -115,6 +121,8 @@ fun AuthScreen(
     onGoogleLoginStarted: () -> Unit,
     onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
+    onEmailLogin: (String, String) -> Unit,
+    onEmailRegister: (String, String, String) -> Unit,
 ) {
     Scaffold(
     modifier = modifier
@@ -137,10 +145,14 @@ fun AuthScreen(
                 googleAuthProviderResult = uiState.googleAuthProviderResult,
                 googleConfigurationErrorMessage = uiState.googleAuthProviderResult.exceptionOrNull()?.message,
                 isGoogleLoginLoading = uiState.isGoogleLoginLoading,
+                isEmailLoginLoading = uiState.isEmailLoginLoading,
+                isRegisterLoading = uiState.isRegisterLoading,
                 resultErrorMessage = resultErrorMessage,
                 onGoogleLoginStarted = onGoogleLoginStarted,
                 onGoogleLoginResult = onGoogleLoginResult,
                 onGoogleLoginConfigurationError = onGoogleLoginConfigurationError,
+                onEmailLogin = onEmailLogin,
+                onEmailRegister = onEmailRegister,
             )
         }
     }
@@ -196,10 +208,14 @@ private fun ContentAuth(
     googleAuthProviderResult: Result<GoogleAuthProvider>,
     googleConfigurationErrorMessage: String?,
     isGoogleLoginLoading: Boolean,
+    isEmailLoginLoading: Boolean,
+    isRegisterLoading: Boolean,
     resultErrorMessage: String?,
     onGoogleLoginStarted: () -> Unit,
     onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
+    onEmailLogin: (String, String) -> Unit,
+    onEmailRegister: (String, String, String) -> Unit,
 ) {
     val tabsList = listOf(
         stringResource(Res.string.auth_login_tab),
@@ -225,10 +241,18 @@ private fun ContentAuth(
 
             when (selectedTabIndex) {
                 0 ->{
-                    LoginContent(Modifier)
+                    LoginContent(
+                        modifier = Modifier,
+                        isLoading = isEmailLoginLoading,
+                        onLogin = onEmailLogin,
+                    )
                 }
                 else ->{
-                    RegisterContent(Modifier)
+                    RegisterContent(
+                        modifier = Modifier,
+                        isLoading = isRegisterLoading,
+                        onRegister = onEmailRegister,
+                    )
                 }
             }
 
@@ -297,8 +321,12 @@ private fun AuthLoginError.toMessage(
     googleLoginFailedIdTokenMessage: String,
     googleLoginFailedFallbackMessage: String,
     googleLoginFailedUnknownTemplate: String,
+    emptyFieldsMessage: String,
+    weakPasswordMessage: String,
 ): String {
     return when (this) {
+        AuthLoginError.EmptyFields -> emptyFieldsMessage
+        AuthLoginError.WeakPassword -> weakPasswordMessage
         AuthLoginError.GoogleUserEmpty -> googleUserEmptyMessage
         AuthLoginError.IdTokenEmpty -> googleLoginFailedIdTokenMessage
         is AuthLoginError.Raw -> message
@@ -311,7 +339,11 @@ private fun AuthLoginError.toMessage(
 }
 
 @Composable
-fun RegisterContent(modifier : Modifier) {
+fun RegisterContent(
+    modifier: Modifier,
+    isLoading: Boolean,
+    onRegister: (String, String, String) -> Unit,
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -322,14 +354,14 @@ fun RegisterContent(modifier : Modifier) {
             Text(stringResource(Res.string.auth_name), color = AuthFieldLabelColor)
             VerticalSpacer(10)
             InputView(leadingIcon = Icons.Default.AccountCircle, placeHolder = stringResource(Res.string.auth_enter_name),
-                input = name) {
+                input = name, isInputTypePassword = false) {
                 name = it
             }
             VerticalSpacer(10)
             Text(stringResource(Res.string.auth_email), color = AuthFieldLabelColor)
             VerticalSpacer(10)
             InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
-                input = email) {
+                input = email, isInputTypePassword = false) {
                 email = it
             }
             VerticalSpacer(30)
@@ -344,8 +376,10 @@ fun RegisterContent(modifier : Modifier) {
             VerticalSpacer(25)
 
             Button(onClick = {
-
-            }, colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
+                onRegister(name, email, password)
+            },
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
                 modifier = Modifier
                     .fillMaxWidth().height(50.dp)){
                 Text(stringResource(Res.string.auth_sign_up))
@@ -367,7 +401,11 @@ fun RegisterContent(modifier : Modifier) {
 }
 
 @Composable
-private fun LoginContent(modifier: Modifier){
+private fun LoginContent(
+    modifier: Modifier,
+    isLoading: Boolean,
+    onLogin: (String, String) -> Unit,
+){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(modifier = modifier.fillMaxWidth()
@@ -375,7 +413,7 @@ private fun LoginContent(modifier: Modifier){
         Text(stringResource(Res.string.auth_email), color = AuthFieldLabelColor)
         VerticalSpacer(10)
         InputView(leadingIcon = Icons.Default.Email, placeHolder = stringResource(Res.string.auth_enter_email),
-            input = email) {
+            input = email, isInputTypePassword = false) {
             email = it
         }
         VerticalSpacer(30)
@@ -395,8 +433,10 @@ private fun LoginContent(modifier: Modifier){
         VerticalSpacer(25)
 
         Button(onClick = {
-
-        }, colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
+            onLogin(email, password)
+        },
+            enabled = !isLoading,
+            colors = ButtonDefaults.buttonColors(containerColor = blue4789d7),
             modifier = Modifier
                 .fillMaxWidth().height(50.dp)){
             Text(stringResource(Res.string.auth_log_in))
@@ -429,6 +469,8 @@ fun AuthScreenPreview() {
             onGoogleLoginStarted = {},
             onGoogleLoginResult = {},
             onGoogleLoginConfigurationError = {},
+            onEmailLogin = { _, _ -> },
+            onEmailRegister = { _, _, _ -> },
         )
     }
 }

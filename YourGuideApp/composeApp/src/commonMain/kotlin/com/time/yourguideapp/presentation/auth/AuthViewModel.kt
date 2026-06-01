@@ -47,6 +47,96 @@ class AuthViewModel : ViewModel() {
         )
     }
 
+    fun onEmailLogin(
+        email: String,
+        password: String,
+    ) {
+        val cleanEmail = email.trim()
+        if (cleanEmail.isBlank() || password.isBlank()) {
+            _uiState.value = _uiState.value.copy(loginError = AuthLoginError.EmptyFields)
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isEmailLoginLoading = true,
+                loginError = null,
+            )
+            runCatching {
+                Firebase.auth.signInWithEmailAndPassword(cleanEmail, password)
+            }.onSuccess { authResult ->
+                val user = authResult.user
+                if (user == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isEmailLoginLoading = false,
+                        loginError = AuthLoginError.Unknown("firebase user empty"),
+                    )
+                } else {
+                    saveUserProfile(user)
+                    _uiState.value = _uiState.value.copy(
+                        isEmailLoginLoading = false,
+                        loginError = null,
+                    )
+                    _events.emit(AuthEvent.LoginSuccess(user))
+                }
+            }.onFailure { throwable ->
+                _uiState.value = _uiState.value.copy(
+                    isEmailLoginLoading = false,
+                    loginError = throwable.toAuthLoginError(),
+                )
+            }
+        }
+    }
+
+    fun onEmailRegister(
+        name: String,
+        email: String,
+        password: String,
+    ) {
+        val cleanName = name.trim()
+        val cleanEmail = email.trim()
+        if (cleanName.isBlank() || cleanEmail.isBlank() || password.isBlank()) {
+            _uiState.value = _uiState.value.copy(loginError = AuthLoginError.EmptyFields)
+            return
+        }
+        if (password.length < MIN_PASSWORD_LENGTH) {
+            _uiState.value = _uiState.value.copy(loginError = AuthLoginError.WeakPassword)
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isRegisterLoading = true,
+                loginError = null,
+            )
+            runCatching {
+                val authResult = Firebase.auth.createUserWithEmailAndPassword(cleanEmail, password)
+                authResult.user?.updateProfile(displayName = cleanName)
+                authResult
+            }.onSuccess { authResult ->
+                val user = authResult.user
+                if (user == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isRegisterLoading = false,
+                        loginError = AuthLoginError.Unknown("firebase user empty"),
+                    )
+                } else {
+                    saveUserProfile(user, nameOverride = cleanName)
+                    _uiState.value = _uiState.value.copy(
+                        isRegisterLoading = false,
+                        loginError = null,
+                    )
+                    _events.emit(AuthEvent.LoginSuccess(user))
+                }
+            }.onFailure { throwable ->
+                _uiState.value = _uiState.value.copy(
+                    isRegisterLoading = false,
+                    loginError = throwable.toAuthLoginError(),
+                )
+            }
+        }
+    }
+
     fun onGoogleLoginResult(user: GoogleUser?) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isGoogleLoginLoading = false)
@@ -139,15 +229,17 @@ class AuthViewModel : ViewModel() {
 }
 
 private const val AUTH_RESTORE_WAIT_MS = 5_000L
+private const val MIN_PASSWORD_LENGTH = 6
 
 private fun saveUserProfile(
     firebaseUser: FirebaseUser,
     googleUser: GoogleUser? = null,
+    nameOverride: String? = null,
 ) {
     AppManager.saveUserProfile(
         uuid = firebaseUser.uid,
         email = firebaseUser.email ?: googleUser?.email.orEmpty(),
-        name = firebaseUser.displayName ?: googleUser?.displayName ?: firebaseUser.email ?: firebaseUser.uid,
+        name = nameOverride ?: firebaseUser.displayName ?: googleUser?.displayName ?: firebaseUser.email ?: firebaseUser.uid,
         photoUrl = firebaseUser.photoURL ?: googleUser?.profilePicUrl.orEmpty(),
     )
 }
@@ -179,6 +271,8 @@ private fun FirebaseUser?.toResolvedAuthGateState(): AuthGateState {
 data class AuthUiState(
     val googleAuthProviderResult: Result<GoogleAuthProvider>,
     val isGoogleLoginLoading: Boolean = false,
+    val isEmailLoginLoading: Boolean = false,
+    val isRegisterLoading: Boolean = false,
     val loginError: AuthLoginError? = null,
 )
 
@@ -189,6 +283,8 @@ sealed interface AuthGateState {
 }
 
 sealed interface AuthLoginError {
+    data object EmptyFields : AuthLoginError
+    data object WeakPassword : AuthLoginError
     data object GoogleUserEmpty : AuthLoginError
     data object IdTokenEmpty : AuthLoginError
     data class Raw(val message: String) : AuthLoginError

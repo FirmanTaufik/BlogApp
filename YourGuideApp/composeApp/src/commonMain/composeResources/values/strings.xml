@@ -115,6 +115,8 @@
     <string name="auth_google_login_failed_idtoken">Google login failed: idToken is empty. On iOS, check GIDServerClientID, GIDClientID, REVERSED_CLIENT_ID URL scheme, and the GIDSignIn.handle(url) callback.</string>
     <string name="auth_google_login_failed_unknown">Google login failed: %1$s.</string>
     <string name="auth_google_login_failed_fallback">Google login failed.</string>
+    <string name="auth_empty_fields">Please fill all fields.</string>
+    <string name="auth_weak_password">Password must be at least 6 characters.</string>
 
     <string name="login_title">Log in</string>
     <string name="login_description">Use your Google account to sign in to YourGuideApp.</string>
