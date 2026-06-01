@@ -115,6 +115,7 @@
     <string name="auth_google_login_failed_idtoken">Google login failed: idToken is empty. On iOS, check GIDServerClientID, GIDClientID, REVERSED_CLIENT_ID URL scheme, and the GIDSignIn.handle(url) callback.</string>
     <string name="auth_google_login_failed_unknown">Google login failed: %1$s.</string>
     <string name="auth_google_login_failed_fallback">Google login failed.</string>
+    <string name="auth_apple_user_empty">Apple login succeeded, but Firebase user is empty.</string>
     <string name="auth_empty_fields">Please fill all fields.</string>
     <string name="auth_weak_password">Password must be at least 6 characters.</string>
 

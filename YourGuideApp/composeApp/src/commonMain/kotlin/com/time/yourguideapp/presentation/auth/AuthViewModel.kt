@@ -47,6 +47,13 @@ class AuthViewModel : ViewModel() {
         )
     }
 
+    fun onAppleLoginStarted() {
+        _uiState.value = _uiState.value.copy(
+            isAppleLoginLoading = true,
+            loginError = null,
+        )
+    }
+
     fun onEmailLogin(
         email: String,
         password: String,
@@ -170,6 +177,32 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun onAppleLoginResult(result: Result<FirebaseUser?>) {
+        viewModelScope.launch {
+            result.onSuccess { user ->
+                if (user == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isAppleLoginLoading = false,
+                        loginError = AuthLoginError.AppleUserEmpty,
+                    )
+                } else {
+                    saveUserProfile(user)
+                    _uiState.value = _uiState.value.copy(
+                        isAppleLoginLoading = false,
+                        loginError = null,
+                    )
+                    _events.emit(AuthEvent.LoginSuccess(user))
+                }
+            }.onFailure { throwable ->
+                _uiState.value = _uiState.value.copy(
+                    isAppleLoginLoading = false,
+                    loginError = throwable.toAuthLoginError(),
+                )
+            }
+        }
+    }
+
+
     fun onGoogleLoginConfigurationError() {
         val message = _uiState.value.googleAuthProviderResult.exceptionOrNull()?.message
         _uiState.value = _uiState.value.copy(
@@ -271,6 +304,7 @@ private fun FirebaseUser?.toResolvedAuthGateState(): AuthGateState {
 data class AuthUiState(
     val googleAuthProviderResult: Result<GoogleAuthProvider>,
     val isGoogleLoginLoading: Boolean = false,
+    val isAppleLoginLoading: Boolean = false,
     val isEmailLoginLoading: Boolean = false,
     val isRegisterLoading: Boolean = false,
     val loginError: AuthLoginError? = null,
@@ -285,6 +319,7 @@ sealed interface AuthGateState {
 sealed interface AuthLoginError {
     data object EmptyFields : AuthLoginError
     data object WeakPassword : AuthLoginError
+    data object AppleUserEmpty : AuthLoginError
     data object GoogleUserEmpty : AuthLoginError
     data object IdTokenEmpty : AuthLoginError
     data class Raw(val message: String) : AuthLoginError

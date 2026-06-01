@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mmk.kmpauth.firebase.apple.AppleButtonUiContainer
 import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mmk.kmpauth.google.GoogleUser
@@ -81,6 +82,7 @@ fun AuthRoute(
     val googleLoginFailedUnknownTemplate = stringResource(Res.string.auth_google_login_failed_unknown)
     val emptyFieldsMessage = stringResource(Res.string.auth_empty_fields)
     val weakPasswordMessage = stringResource(Res.string.auth_weak_password)
+    val appleUserEmptyMessage = stringResource(Res.string.auth_apple_user_empty)
     val resultErrorMessage = uiState.loginError?.toMessage(
         googleWebClientMissingMessage = googleWebClientMissingMessage,
         googleUserEmptyMessage = googleUserEmptyMessage,
@@ -89,6 +91,7 @@ fun AuthRoute(
         googleLoginFailedUnknownTemplate = googleLoginFailedUnknownTemplate,
         emptyFieldsMessage = emptyFieldsMessage,
         weakPasswordMessage = weakPasswordMessage,
+        appleUserEmptyMessage = appleUserEmptyMessage,
     )
 
     LaunchedEffect(viewModel) {
@@ -107,6 +110,8 @@ fun AuthRoute(
         onGoogleLoginStarted = viewModel::onGoogleLoginStarted,
         onGoogleLoginResult = viewModel::onGoogleLoginResult,
         onGoogleLoginConfigurationError = viewModel::onGoogleLoginConfigurationError,
+        onAppleLoginStarted = viewModel::onAppleLoginStarted,
+        onAppleLoginResult = viewModel::onAppleLoginResult,
         onEmailLogin = viewModel::onEmailLogin,
         onEmailRegister = viewModel::onEmailRegister,
     )
@@ -121,6 +126,8 @@ fun AuthScreen(
     onGoogleLoginStarted: () -> Unit,
     onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
+    onAppleLoginStarted: () -> Unit,
+    onAppleLoginResult: (Result<FirebaseUser?>) -> Unit,
     onEmailLogin: (String, String) -> Unit,
     onEmailRegister: (String, String, String) -> Unit,
 ) {
@@ -145,12 +152,15 @@ fun AuthScreen(
                 googleAuthProviderResult = uiState.googleAuthProviderResult,
                 googleConfigurationErrorMessage = uiState.googleAuthProviderResult.exceptionOrNull()?.message,
                 isGoogleLoginLoading = uiState.isGoogleLoginLoading,
+                isAppleLoginLoading = uiState.isAppleLoginLoading,
                 isEmailLoginLoading = uiState.isEmailLoginLoading,
                 isRegisterLoading = uiState.isRegisterLoading,
                 resultErrorMessage = resultErrorMessage,
                 onGoogleLoginStarted = onGoogleLoginStarted,
                 onGoogleLoginResult = onGoogleLoginResult,
                 onGoogleLoginConfigurationError = onGoogleLoginConfigurationError,
+                onAppleLoginStarted = onAppleLoginStarted,
+                onAppleLoginResult = onAppleLoginResult,
                 onEmailLogin = onEmailLogin,
                 onEmailRegister = onEmailRegister,
             )
@@ -208,12 +218,15 @@ private fun ContentAuth(
     googleAuthProviderResult: Result<GoogleAuthProvider>,
     googleConfigurationErrorMessage: String?,
     isGoogleLoginLoading: Boolean,
+    isAppleLoginLoading: Boolean,
     isEmailLoginLoading: Boolean,
     isRegisterLoading: Boolean,
     resultErrorMessage: String?,
     onGoogleLoginStarted: () -> Unit,
     onGoogleLoginResult: (GoogleUser?) -> Unit,
     onGoogleLoginConfigurationError: () -> Unit,
+    onAppleLoginStarted: () -> Unit,
+    onAppleLoginResult: (Result<FirebaseUser?>) -> Unit,
     onEmailLogin: (String, String) -> Unit,
     onEmailRegister: (String, String, String) -> Unit,
 ) {
@@ -262,9 +275,20 @@ private fun ContentAuth(
                     .wrapContentHeight()
                     .padding(horizontal = 20.dp)) {
 
-                AppleSignInButton (text = stringResource(Res.string.auth_apple_button),
-                    modifier = Modifier.fillMaxWidth() ){
-
+                AppleButtonUiContainer(
+                    onResult = onAppleLoginResult,
+                    linkAccount = false,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    AppleSignInButton(
+                        text = stringResource(Res.string.auth_apple_button),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (!isAppleLoginLoading) {
+                            onAppleLoginStarted()
+                            this.onClick()
+                        }
+                    }
                 }
                 VerticalSpacer(10)
                 if (googleAuthProviderResult.isSuccess) {
@@ -323,10 +347,12 @@ private fun AuthLoginError.toMessage(
     googleLoginFailedUnknownTemplate: String,
     emptyFieldsMessage: String,
     weakPasswordMessage: String,
+    appleUserEmptyMessage: String,
 ): String {
     return when (this) {
         AuthLoginError.EmptyFields -> emptyFieldsMessage
         AuthLoginError.WeakPassword -> weakPasswordMessage
+        AuthLoginError.AppleUserEmpty -> appleUserEmptyMessage
         AuthLoginError.GoogleUserEmpty -> googleUserEmptyMessage
         AuthLoginError.IdTokenEmpty -> googleLoginFailedIdTokenMessage
         is AuthLoginError.Raw -> message
@@ -469,6 +495,8 @@ fun AuthScreenPreview() {
             onGoogleLoginStarted = {},
             onGoogleLoginResult = {},
             onGoogleLoginConfigurationError = {},
+            onAppleLoginStarted = {},
+            onAppleLoginResult = {},
             onEmailLogin = { _, _ -> },
             onEmailRegister = { _, _, _ -> },
         )
