@@ -55,3 +55,5 @@ actual fun rememberMapLauncher(): (String) -> Unit {
         }
     }
 }
+
+actual fun getPixabayApiKey(): String = BuildConfig.PIXABAY_API_KEY

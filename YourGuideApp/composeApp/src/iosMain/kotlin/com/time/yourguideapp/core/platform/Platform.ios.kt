@@ -65,3 +65,7 @@ private fun String.mapQueryValue(): String {
         .replace("#", "%23")
         .replace("?", "%3F")
 }
+
+actual fun getPixabayApiKey(): String {
+    return NSBundle.mainBundle.objectForInfoDictionaryKey("PixabayApiKey") as? String ?: ""
+}

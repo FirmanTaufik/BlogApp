@@ -1,5 +1,17 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use(::load)
+    }
+}
+
+fun escapedBuildConfigString(value: String): String {
+    return value.replace("\\", "\\\\").replace("\"", "\\\"")
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -83,6 +95,15 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        buildConfigField(
+            "String",
+            "PIXABAY_API_KEY",
+            "\"${escapedBuildConfigString(
+                (findProperty("PIXABAY_API_KEY") as? String)
+                    ?: localProperties.getProperty("PIXABAY_API_KEY")
+                    ?: ""
+            )}\"",
+        )
     }
     packaging {
         resources {

@@ -22,3 +22,5 @@ expect fun rememberShareAppLauncher(): (String) -> Unit
 
 @Composable
 expect fun rememberMapLauncher(): (String) -> Unit
+
+expect fun getPixabayApiKey(): String

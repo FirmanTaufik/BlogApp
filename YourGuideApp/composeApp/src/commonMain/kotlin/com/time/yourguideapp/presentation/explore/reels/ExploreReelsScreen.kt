@@ -26,9 +26,12 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -51,12 +54,13 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import chaintech.videoplayer.host.MediaPlayerHost
 import chaintech.videoplayer.model.VideoPlayerConfig
-import chaintech.videoplayer.ui.youtube.YouTubePlayerComposable
+import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import coil3.compose.AsyncImage
+import com.time.yourguideapp.presentation.component.VerticalSpacer
 import com.time.yourguideapp.presentation.explore.ExploreVideo
-import com.time.yourguideapp.presentation.explore.dummyExploreVideos
 
 data class ExploreReelsScreen(
+    val videos: List<ExploreVideo>,
     val initialPage: Int,
 ) : Screen {
     @Composable
@@ -64,7 +68,7 @@ data class ExploreReelsScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         ExploreReelsPager(
-            videos = dummyExploreVideos,
+            videos = videos,
             initialPage = initialPage,
             modifier = Modifier.fillMaxSize(),
             onBack = { navigator.pop() },
@@ -72,6 +76,7 @@ data class ExploreReelsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExploreReelsPager(
     videos: List<ExploreVideo>,
@@ -79,8 +84,10 @@ private fun ExploreReelsPager(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
 ) {
+    var commentVideo by remember { mutableStateOf<ExploreVideo?>(null) }
+    val commentSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val pagerState = rememberPagerState(initialPage = initialPage) {
-        videos.size
+            videos.size
     }
     VerticalPager(
         state = pagerState,
@@ -92,24 +99,39 @@ private fun ExploreReelsPager(
             ExploreReelPage(
                 video = videos[page],
                 isActive = page == pagerState.currentPage,
+                onOpenComments = {
+                    commentVideo = videos[page]
+                },
             )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 16.dp)
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.42f))
-                    .clickable(onClick = onBack),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp),
-                )
+            Column(modifier = Modifier.fillMaxSize()) {
+                VerticalSpacer(20)
+                Box(
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 16.dp)
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.42f))
+                        .clickable(onClick = onBack),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
+        }
+    }
+
+    commentVideo?.let { video ->
+        ModalBottomSheet(
+            onDismissRequest = { commentVideo = null },
+            sheetState = commentSheetState,
+            containerColor = Color.White,
+        ) {
+            CommentsSheetContent(video = video)
         }
     }
 }
@@ -118,16 +140,17 @@ private fun ExploreReelsPager(
 private fun ExploreReelPage(
     video: ExploreVideo,
     isActive: Boolean,
+    onOpenComments: () -> Unit,
 ) {
-    val playerHost = remember(video.youtubeId) {
+    val playerHost = remember(video.videoUrl) {
         MediaPlayerHost(
-            mediaUrl = video.youtubeId,
+            mediaUrl = video.videoUrl,
             autoPlay = false,
             isMuted = false,
             isLooping = true,
         )
     }
-    var isPaused by remember(video.youtubeId) { mutableStateOf(false) }
+    var isPaused by remember(video.videoUrl) { mutableStateOf(false) }
 
     LaunchedEffect(isActive) {
         if (isActive) {
@@ -153,13 +176,13 @@ private fun ExploreReelPage(
             },
     ) {
         if (isActive) {
-            CroppedYoutubePlayer(
+            CroppedVideoPlayer(
                 playerHost = playerHost,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
             AsyncImage(
-                model = "https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg",
+                model = video.thumbnailUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
@@ -183,7 +206,7 @@ private fun ExploreReelPage(
         Row(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(end = 16.dp, top = 16.dp)
+                .padding(end = 16.dp, top = 46.dp)
                 .clip(CircleShape)
                 .background(Color.Black.copy(alpha = 0.38f))
                 .padding(horizontal = 10.dp, vertical = 7.dp),
@@ -215,6 +238,9 @@ private fun ExploreReelPage(
         ReelActions(
             likes = video.likes,
             comments = video.comments,
+            views = video.views,
+            downloads = video.downloads,
+            onOpenComments = onOpenComments,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 118.dp),
@@ -241,7 +267,7 @@ private fun ExploreReelPage(
 }
 
 @Composable
-private fun CroppedYoutubePlayer(
+private fun CroppedVideoPlayer(
     playerHost: MediaPlayerHost,
     modifier: Modifier = Modifier,
 ) {
@@ -259,7 +285,7 @@ private fun CroppedYoutubePlayer(
             maxHeight
         }
 
-        YouTubePlayerComposable(
+        VideoPlayerComposable(
             modifier = Modifier
                 .width(playerWidth)
                 .height(playerHeight)
@@ -295,16 +321,25 @@ private fun ReelInfo(
                     .background(Color.White.copy(alpha = 0.92f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = video.title.first().toString(),
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                )
+                if (video.creatorAvatarUrl.isBlank()) {
+                    Text(
+                        text = video.creatorName.firstOrNull()?.toString().orEmpty(),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                    )
+                } else {
+                    AsyncImage(
+                        model = video.creatorAvatarUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
-                    text = video.title,
+                    text = video.creatorName,
                     color = Color.White,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
@@ -312,7 +347,10 @@ private fun ReelInfo(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = video.location,
+                    text = listOfNotNull(
+                        video.duration.takeIf { it.isNotBlank() },
+                        video.views.takeIf { it.isNotBlank() }?.let { "$it views" },
+                    ).joinToString(" • "),
                     color = Color.White.copy(alpha = 0.82f),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
@@ -327,7 +365,7 @@ private fun ReelInfo(
             text = video.description,
             color = Color.White,
             style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
         )
     }
@@ -337,6 +375,9 @@ private fun ReelInfo(
 private fun ReelActions(
     likes: String,
     comments: String,
+    views: String,
+    downloads: String,
+    onOpenComments: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -345,9 +386,107 @@ private fun ReelActions(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         ReelActionButton(Icons.Default.FavoriteBorder, likes)
-        ReelActionButton(Icons.Default.ChatBubbleOutline, comments)
+        ReelActionButton(
+            icon = Icons.Default.ChatBubbleOutline,
+            label = comments,
+            onClick = onOpenComments,
+        )
+        ReelActionButton(Icons.Default.PlayArrow, views)
+        ReelActionButton(Icons.Default.MoreHoriz, downloads)
         ReelActionButton(Icons.AutoMirrored.Filled.Send, "Share")
-        ReelActionButton(Icons.Default.MoreHoriz, "")
+    }
+}
+
+@Composable
+private fun CommentsSheetContent(video: ExploreVideo) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+    ) {
+        Text(
+            text = "Comments",
+            color = Color.Black,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "${video.comments.ifBlank { "0" }} comments on Pixabay",
+            color = Color.Black.copy(alpha = 0.62f),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        CommentSheetRow(
+            avatarText = video.creatorName.firstOrNull()?.toString().orEmpty(),
+            avatarUrl = video.creatorAvatarUrl,
+            author = video.creatorName,
+            body = "Video tags: ${video.tags.ifBlank { video.title }}",
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        CommentSheetRow(
+            avatarText = "P",
+            avatarUrl = "",
+            author = "Pixabay API",
+            body = "Pixabay menyediakan jumlah komentar, tetapi tidak menyediakan isi daftar komentar pada response videos API.",
+        )
+    }
+}
+
+@Composable
+private fun CommentSheetRow(
+    avatarText: String,
+    avatarUrl: String,
+    author: String,
+    body: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFEAF1FB)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (avatarUrl.isBlank()) {
+                Text(
+                    text = avatarText,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                )
+            } else {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = author,
+                color = Color.Black,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                text = body,
+                color = Color.Black.copy(alpha = 0.74f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
@@ -355,13 +494,15 @@ private fun ReelActions(
 private fun ReelActionButton(
     icon: ImageVector,
     label: String,
+    onClick: (() -> Unit)? = null,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.32f)),
+                .background(Color.Black.copy(alpha = 0.32f))
+                .clickable(enabled = onClick != null) { onClick?.invoke() },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
