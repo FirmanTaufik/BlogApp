@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import platform.Foundation.NSArray
 import platform.Foundation.NSBundle
 import platform.Foundation.NSString
+import platform.Foundation.NSURL
 import platform.Foundation.create
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
@@ -42,4 +43,25 @@ actual fun rememberShareAppLauncher(): (String) -> Unit {
         val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
         rootViewController?.presentViewController(controller, animated = true, completion = null)
     }
+}
+
+@Composable
+actual fun rememberMapLauncher(): (String) -> Unit {
+    return { query ->
+        val encodedQuery = query.mapQueryValue()
+        val url = NSURL.URLWithString("http://maps.apple.com/?q=$encodedQuery")
+        if (url != null) {
+            UIApplication.sharedApplication.openURL(url)
+        }
+    }
+}
+
+private fun String.mapQueryValue(): String {
+    return trim()
+        .replace("%", "%25")
+        .replace(" ", "%20")
+        .replace(",", "%2C")
+        .replace("&", "%26")
+        .replace("#", "%23")
+        .replace("?", "%3F")
 }

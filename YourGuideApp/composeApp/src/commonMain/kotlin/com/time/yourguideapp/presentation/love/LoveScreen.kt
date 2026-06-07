@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,7 +26,9 @@ import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.detail.DetailScreen
 import com.time.yourguideapp.presentation.home.PostItem
 import org.jetbrains.compose.resources.stringResource
-import yourguideapp.composeapp.generated.resources.*
+import yourguideapp.composeapp.generated.resources.Res
+import yourguideapp.composeapp.generated.resources.love_empty_body
+import yourguideapp.composeapp.generated.resources.love_empty_title
 
 @Composable
 fun LoveScreen(
@@ -40,6 +43,7 @@ fun LoveScreen(
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 112.dp),
         ) {
             items(lovedPosts) { post ->
                 val label = post.labelIds

@@ -19,3 +19,6 @@ expect fun getAppVersion(): String
 
 @Composable
 expect fun rememberShareAppLauncher(): (String) -> Unit
+
+@Composable
+expect fun rememberMapLauncher(): (String) -> Unit

@@ -97,7 +97,14 @@ data object MainScreen : Screen {
 
         MainContent(
             initialTab = MainTab.Home,
-            tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
+            tabs = listOf(
+                MainTab.Home,
+                MainTab.Weather,
+                MainTab.Explore,
+                MainTab.Currency,
+                MainTab.PopularPlaces,
+                MainTab.Loves,
+            ),
             searchPosts = posts,
             labels = labels,
             userName = currentUser?.displayName
@@ -392,9 +399,16 @@ data object MainScreen : Screen {
     @Preview(showBackground = true, showSystemUi = true)
     private fun RootScreenPreview() {
         MaterialTheme {
-            MainContent(
-                initialTab = MainTab.Home,
-                tabs = listOf(MainTab.Home, MainTab.Weather, MainTab.Explore, MainTab.Currency, MainTab.Loves),
+                MainContent(
+                    initialTab = MainTab.Home,
+                tabs = listOf(
+                    MainTab.Home,
+                    MainTab.Weather,
+                    MainTab.Explore,
+                    MainTab.Currency,
+                    MainTab.PopularPlaces,
+                    MainTab.Loves,
+                ),
                 searchPosts = emptyList(),
                 labels = emptyList(),
                 userName = stringResource(Res.string.default_display_name),

@@ -1,6 +1,7 @@
 package com.time.yourguideapp.core.platform
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -30,5 +31,27 @@ actual fun rememberShareAppLauncher(): (String) -> Unit {
             putExtra(Intent.EXTRA_TEXT, it)
         }
         context.startActivity(Intent.createChooser(intent, chooserTitle))
+    }
+}
+
+@Composable
+actual fun rememberMapLauncher(): (String) -> Unit {
+    val context = LocalContext.current
+    return { query ->
+        val encodedQuery = Uri.encode(query)
+        val geoIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("geo:0,0?q=$encodedQuery"),
+        )
+        val webIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.google.com/maps/search/?api=1&query=$encodedQuery"),
+        )
+
+        runCatching {
+            context.startActivity(geoIntent)
+        }.getOrElse {
+            context.startActivity(webIntent)
+        }
     }
 }

@@ -7,6 +7,7 @@
     <string name="nav_explore">Explore</string>
     <string name="nav_weather">Weather</string>
     <string name="nav_currency">Dollar Rates</string>
+    <string name="nav_popular_places">Popular</string>
     <string name="nav_loves">Loves</string>
 
     <string name="profile_title">Profile</string>
@@ -65,6 +66,17 @@
 
     <string name="love_empty_title">No saved destinations yet</string>
     <string name="love_empty_body">Tap the heart icon on a destination to save it here.</string>
+    <string name="love_saved_title">Saved destinations</string>
+    <string name="popular_places_title">Popular world destinations</string>
+    <string name="popular_places_unavailable">Popular destinations unavailable</string>
+    <string name="popular_places_try_again">Try again</string>
+    <string name="continent_all">All</string>
+    <string name="continent_asia">Asia</string>
+    <string name="continent_europe">Europe</string>
+    <string name="continent_africa">Africa</string>
+    <string name="continent_north_america">North America</string>
+    <string name="continent_south_america">South America</string>
+    <string name="continent_oceania">Oceania</string>
 
     <string name="weather_forecast_title">7-Day Forecast</string>
     <string name="weather_wind">Wind</string>
