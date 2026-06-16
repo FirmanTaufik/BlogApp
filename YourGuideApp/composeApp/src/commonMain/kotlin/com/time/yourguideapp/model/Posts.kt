@@ -1,5 +1,6 @@
 package com.time.yourguideapp.model
 
+import com.time.yourguideapp.helper.AppManager
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,26 +15,29 @@ data class Posts (
     val labelIds : List<String>,
     val updatedAt: String,
     val views: String,
-    val locales : Locales,
+    val locales : Map<String, LocaleData> = emptyMap(),
 ){
 
-    fun getCurrentLocaleData(): Locales.LocalesData {
-        return if (currentLocale == "id"){
-            locales.id
-        } else locales.en
+    fun getCurrentLocaleData(): LocaleData {
+        return getLocaleData(AppManager.currentLanguage) ?: LocaleData()
+    }
+
+    fun hasCurrentLocaleContent(): Boolean {
+        return hasLocaleContent(AppManager.currentLanguage)
+    }
+
+    fun hasLocaleContent(locale: String): Boolean {
+        val data = getLocaleData(locale) ?: return false
+        return data.title.isNotBlank() || data.content.isNotBlank()
+    }
+
+    private fun getLocaleData(locale: String): LocaleData? {
+        return locales[locale.lowercase()]
     }
 
     @Serializable
-    data class Locales (
-       val en  : LocalesData,
-       val id : LocalesData
-
-    ) {
-
-        @Serializable
-        data class LocalesData(
-            val title : String,
-            val content : String,
-        )
-    }
+    data class LocaleData(
+        val title : String = "",
+        val content : String = "",
+    )
 }

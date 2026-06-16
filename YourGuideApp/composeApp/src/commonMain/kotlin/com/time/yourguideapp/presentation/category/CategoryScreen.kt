@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.glassmorphism
@@ -56,6 +57,7 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
         val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
             ?.bookmarkPostIds
             .orEmpty()
+        val currentLanguage = AppManager.currentLanguage
 
         LaunchedEffect(Unit){
             viewModel.getListByLabel(label, data)
@@ -96,7 +98,8 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
                 contentAlignment = Alignment.Center){
                 when (uiState){
                     is UIState.Success<*> -> {
-                        val listPostByLabel = (uiState as UIState.Success<*>).data as List<Posts>
+                        val listPostByLabel = ((uiState as UIState.Success<*>).data as List<Posts>)
+                            .filter { post -> post.hasLocaleContent(currentLanguage) }
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             itemsIndexed(listPostByLabel){ index, item ->
                                 val labelName = label.getCurrentLanguage()

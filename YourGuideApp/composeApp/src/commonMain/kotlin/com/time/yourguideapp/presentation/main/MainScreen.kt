@@ -92,7 +92,11 @@ data object MainScreen : Screen {
         val viewModel = LocalMainViewModel.current
         val state by viewModel.state.collectAsState()
         val homeData = (state as? UIState.Success<*>)?.data as? HomeData
-        val posts = homeData?.posts.orEmpty()
+        val currentLanguage = AppManager.currentLanguage
+        val posts = homeData
+            ?.posts
+            ?.filter { post -> post.hasLocaleContent(currentLanguage) }
+            .orEmpty()
         val labels = homeData?.labels.orEmpty()
         val adMobConfig = homeData?.adMobConfig
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)

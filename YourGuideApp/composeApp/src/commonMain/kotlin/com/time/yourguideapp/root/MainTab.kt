@@ -182,9 +182,13 @@ sealed class MainTab(
             val rootNavigator = LocalRootNavigator.current
             val state by viewModel.state.collectAsState()
             val homeData = (state as? UIState.Success<*>)?.data as? HomeData
+            val currentLanguage = com.time.yourguideapp.helper.AppManager.currentLanguage
             val labels = homeData?.labels.orEmpty()
             val lovedPosts = homeData?.posts
-                ?.filter { post -> homeData.bookmarkPostIds.contains(post.idPost) }
+                ?.filter { post ->
+                    homeData.bookmarkPostIds.contains(post.idPost) &&
+                        post.hasLocaleContent(currentLanguage)
+                }
                 .orEmpty()
 
             LoveScreen(

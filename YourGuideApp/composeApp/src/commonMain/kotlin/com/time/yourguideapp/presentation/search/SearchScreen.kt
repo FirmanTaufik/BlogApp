@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
+import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
@@ -67,14 +68,18 @@ data class SearchScreen(val listPost : List<Posts>, val labels : List<Label>) : 
         val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
             ?.bookmarkPostIds
             .orEmpty()
+        val currentLanguage = AppManager.currentLanguage
         val focusRequester = remember { FocusRequester() }
-        val filteredPosts = remember(query, listPost, labels) {
+        val filteredPosts = remember(query, listPost, labels, currentLanguage) {
             val keyword = query.trim()
+            val visiblePosts = listPost.filter { post ->
+                post.hasLocaleContent(currentLanguage)
+            }
 
             if (keyword.isBlank()) {
-                listPost
+                visiblePosts
             } else {
-                listPost.filter { post ->
+                visiblePosts.filter { post ->
                     val localeData = post.getCurrentLocaleData()
                     val labelNames = post.labelIds
                         .mapNotNull { labelId -> labels.find { it.idLabel == labelId } }

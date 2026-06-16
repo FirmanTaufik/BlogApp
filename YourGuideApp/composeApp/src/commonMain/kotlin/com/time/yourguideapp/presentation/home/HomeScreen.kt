@@ -34,6 +34,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
+import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
@@ -67,6 +68,10 @@ fun HomeScreen(
 
             is UIState.Success<*> -> {
                 val data = state.data as HomeData
+                val currentLanguage = AppManager.currentLanguage
+                val visiblePosts = data.posts.filter { post ->
+                    post.hasLocaleContent(currentLanguage)
+                }
                 LaunchedEffect(data){
                     print("Hallo this loge ${data.posts.size}")
                 }
@@ -87,7 +92,7 @@ fun HomeScreen(
                                 items(data.labels) { label ->
                                     Box(modifier= Modifier.padding(horizontal = 10.dp)
                                         .clickable{
-                                            onOpenCategory(label,data.posts, data.labels)
+                                            onOpenCategory(label, visiblePosts, data.labels)
                                         }
                                     ){
                                         Row(
@@ -119,7 +124,7 @@ fun HomeScreen(
                         }
 
 
-                        itemsIndexed(data.posts){ index, item ->
+                        itemsIndexed(visiblePosts){ index, item ->
                             val labelId = item.labelIds.firstOrNull()
                             val label = data.labels.find { it.idLabel == labelId }?.getCurrentLanguage() ?: ""
                             AppLogger.d (tag = "HomeTAG"){ "Ini Label $label ${labelId.orEmpty()} ${data.labels.size}" }
