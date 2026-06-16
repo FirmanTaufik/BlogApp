@@ -179,7 +179,7 @@ data class DetailScreen(
             },
             bottomBar = {
                 Column {
-                    BottomAppBar(containerColor = Color.Transparent,) {
+                    /*BottomAppBar(containerColor = Color.Transparent,) {
                         Row (modifier = Modifier.fillMaxWidth()
                             .padding(horizontal = 15.dp),
                             horizontalArrangement = Arrangement.SpaceBetween){
@@ -208,7 +208,7 @@ data class DetailScreen(
                         }
 
 
-                    }
+                    }*/
                     if (showBannerAd) {
                         AdMobBanner(
                             modifier = Modifier.fillMaxWidth(),

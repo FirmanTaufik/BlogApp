@@ -13,6 +13,11 @@ const cancelEditButton = document.getElementById("cancel-edit-button");
 const submitButton = document.getElementById("submit-button");
 const postList = document.getElementById("post-list");
 const emptyState = document.getElementById("empty-state");
+const postPagination = document.getElementById("post-pagination");
+const postPageSizeInput = document.getElementById("post-page-size");
+const postPrevPageButton = document.getElementById("post-prev-page");
+const postNextPageButton = document.getElementById("post-next-page");
+const postPageInfo = document.getElementById("post-page-info");
 const navTabs = document.querySelectorAll("[data-view-target]");
 const adminViews = document.querySelectorAll("[data-view]");
 const imagePreview = document.getElementById("image-preview");
@@ -107,6 +112,9 @@ let editingLabelImageName = "";
 let editingLocaleCode = null;
 let currentAdmobConfig = null;
 let currentHomeSliderConfig = null;
+let savedPosts = [];
+let postCurrentPage = 1;
+let postPageSize = Number(postPageSizeInput ? postPageSizeInput.value : 10) || 10;
 
 if (missingConfig.length === 0 && window.firebase) {
   firebase.initializeApp(firebaseConfig);
@@ -119,6 +127,30 @@ coverImageInput.addEventListener("input", function () {
 labelImageInput.addEventListener("input", function () {
   syncUrlPreview(labelImageInput, labelImagePreview, labelImagePreviewWrapper);
 });
+if (postPageSizeInput) {
+  postPageSizeInput.addEventListener("change", function () {
+    postPageSize = Number(postPageSizeInput.value) || 10;
+    postCurrentPage = 1;
+    renderPosts(savedPosts);
+  });
+}
+if (postPrevPageButton) {
+  postPrevPageButton.addEventListener("click", function () {
+    if (postCurrentPage > 1) {
+      postCurrentPage -= 1;
+      renderPosts(savedPosts);
+    }
+  });
+}
+if (postNextPageButton) {
+  postNextPageButton.addEventListener("click", function () {
+    const totalPages = Math.max(1, Math.ceil(savedPosts.length / postPageSize));
+    if (postCurrentPage < totalPages) {
+      postCurrentPage += 1;
+      renderPosts(savedPosts);
+    }
+  });
+}
 postForm.addEventListener("submit", handlePostSubmit);
 labelForm.addEventListener("submit", handleLabelSubmit);
 localeForm.addEventListener("submit", handleLocaleSubmit);
@@ -184,6 +216,21 @@ function setMessage(element, message, type) {
   element.className = `status${nextType ? ` ${nextType}` : ""}`;
 }
 
+function showRequiredError(statusElement, message, focusElement) {
+  window.alert(message);
+  setMessage(statusElement, message, "error");
+
+  if (focusElement && typeof focusElement.focus === "function") {
+    focusElement.focus();
+  }
+}
+
+function findEmptyField(container, selector) {
+  return Array.from(container.querySelectorAll(selector)).find(function (field) {
+    return !(field.value || "").trim();
+  });
+}
+
 function formatDate(timestamp) {
   if (!timestamp || typeof timestamp.toDate !== "function") {
     return "-";
@@ -220,6 +267,15 @@ function parseSliderImageUrls(value) {
       return url.trim();
     })
     .filter(Boolean);
+}
+
+function isValidHttpUrl(value) {
+  try {
+    const parsedUrl = new URL(value);
+    return ["http:", "https:"].includes(parsedUrl.protocol);
+  } catch (_error) {
+    return false;
+  }
 }
 
 function escapeHtml(value) {
@@ -448,6 +504,7 @@ function createLocaleCard(args) {
         data-locale="${escapeHtml(args.locale.code)}"
         data-field="title"
         placeholder="Masukkan title untuk ${escapeHtml(args.locale.code.toUpperCase())}"
+        required
       />
     </label>
     <label>
@@ -456,6 +513,7 @@ function createLocaleCard(args) {
         rows="8"
         data-locale="${escapeHtml(args.locale.code)}"
         data-field="content"
+        required
       ></textarea>
     </label>
   `;
@@ -480,6 +538,7 @@ function createLabelLocaleCard(args) {
         data-locale="${escapeHtml(args.locale.code)}"
         data-field="name"
         placeholder="Nama label untuk ${escapeHtml(args.locale.code.toUpperCase())}"
+        required
       />
     </label>
   `;
@@ -846,12 +905,7 @@ function buildHomeSliderPayload() {
   }
 
   const invalidUrl = images.find(function (url) {
-    try {
-      const parsedUrl = new URL(url);
-      return !["http:", "https:"].includes(parsedUrl.protocol);
-    } catch (_error) {
-      return true;
-    }
+    return !isValidHttpUrl(url);
   });
 
   if (invalidUrl) {
@@ -885,6 +939,26 @@ function buildAdmobPayload() {
   const interstitialAdUnitId = (admobInterstitialIdInput.value || "").trim();
   const interstitialInterval = Number(admobInterstitialIntervalInput.value || 3);
   const appOpenAdUnitId = (admobAppOpenIdInput.value || "").trim();
+
+  if (!appId) {
+    return { error: "AdMob App ID Android wajib diisi." };
+  }
+
+  if (!bannerAdUnitId) {
+    return { error: "Banner ad unit ID wajib diisi." };
+  }
+
+  if (!interstitialAdUnitId) {
+    return { error: "Interstitial ad unit ID wajib diisi." };
+  }
+
+  if (!(admobInterstitialIntervalInput.value || "").trim()) {
+    return { error: "Interval klik interstitial wajib diisi." };
+  }
+
+  if (!appOpenAdUnitId) {
+    return { error: "App open ad unit ID wajib diisi." };
+  }
 
   if (!isValidAdMobAppId(appId)) {
     return { error: "Format AdMob App ID tidak valid. Contoh: ca-app-pub-3940256099942544~3347511713" };
@@ -1004,18 +1078,14 @@ async function fillDummyPostForm() {
 function buildLocalizedFields(entries, entityName) {
   const localizedFields = {};
 
-  Object.entries(entries).forEach(function (entry) {
-    const locale = entry[0];
-    const value = entry[1];
+  availableLocales.forEach(function (availableLocale) {
+    const locale = availableLocale.code;
+    const value = entries[locale] || {};
     const title = (value.title || "").trim();
     const content = (value.content || "").trim();
 
-    if (!title && !content) {
-      return;
-    }
-
     if (!title || !content) {
-      localizedFields.__error = `${entityName} locale ${locale.toUpperCase()} harus mengisi title dan content sekaligus.`;
+      localizedFields.__error = `${entityName} locale ${locale.toUpperCase()} wajib mengisi title dan content.`;
       return;
     }
 
@@ -1035,12 +1105,13 @@ function buildLocalizedFields(entries, entityName) {
 function buildLocalizedNames(entries) {
   const names = {};
 
-  Object.entries(entries).forEach(function (entry) {
-    const locale = entry[0];
-    const value = entry[1];
+  availableLocales.forEach(function (availableLocale) {
+    const locale = availableLocale.code;
+    const value = entries[locale] || {};
     const name = (value.name || "").trim();
 
     if (!name) {
+      names.__error = `Nama label untuk locale ${locale.toUpperCase()} wajib diisi.`;
       return;
     }
 
@@ -1076,6 +1147,10 @@ function buildPostLocales() {
 function buildLabelNames() {
   const draft = captureLabelDraft();
   const names = buildLocalizedNames(draft);
+
+  if (names.__error) {
+    return { error: names.__error };
+  }
 
   if (getLocaleKeys(names).length === 0) {
     return { error: "Isi minimal satu nama label." };
@@ -1332,13 +1407,18 @@ async function handleLocaleSubmit(event) {
   const code = normalizeLocaleCode(localeCodeInput.value);
   const name = localeNameInput.value.trim();
 
-  if (!code || !name) {
-    setMessage(localeStatusMessage, "Kode locale dan nama bahasa wajib diisi.", "error");
+  if (!code) {
+    showRequiredError(localeStatusMessage, "Kode locale wajib diisi.", localeCodeInput);
+    return;
+  }
+
+  if (!name) {
+    showRequiredError(localeStatusMessage, "Nama bahasa wajib diisi.", localeNameInput);
     return;
   }
 
   if (!isValidLocaleCode(code)) {
-    setMessage(localeStatusMessage, "Format kode locale tidak valid. Contoh: id, en, pt-br.", "error");
+    showRequiredError(localeStatusMessage, "Format kode locale tidak valid. Contoh: id, en, pt-br.", localeCodeInput);
     return;
   }
 
@@ -1413,27 +1493,52 @@ async function handlePostSubmit(event) {
   }
 
   if (availableLocales.length === 0) {
-    setMessage(statusMessage, "Tambahkan bahasa terlebih dahulu sebelum membuat artikel.", "error");
+    showRequiredError(statusMessage, "Tambahkan bahasa terlebih dahulu sebelum membuat artikel.", null);
     return;
   }
 
   const coverImageUrlInput = (coverImageInput.value || "").trim();
+  const defaultLocale = postDefaultLocaleInput.value;
 
-  if (!coverImageUrlInput && !editingPostId) {
-    setMessage(statusMessage, "Cover image URL wajib diisi.", "error");
+  if (!defaultLocale) {
+    showRequiredError(statusMessage, "Default locale artikel wajib dipilih.", postDefaultLocaleInput);
+    return;
+  }
+
+  if (!coverImageUrlInput) {
+    showRequiredError(statusMessage, "Cover image URL wajib diisi.", coverImageInput);
+    return;
+  }
+
+  if (!isValidHttpUrl(coverImageUrlInput)) {
+    showRequiredError(statusMessage, "Cover image URL harus memakai format http atau https yang valid.", coverImageInput);
     return;
   }
 
   const localesResult = buildPostLocales();
 
   if (localesResult.error) {
-    setMessage(statusMessage, localesResult.error, "error");
+    showRequiredError(
+      statusMessage,
+      localesResult.error,
+      findEmptyField(postLocaleFields, "input, textarea"),
+    );
     return;
   }
 
   const labels = getSelectedLabels();
+
+  if (availableLabels.length === 0) {
+    showRequiredError(statusMessage, "Tambahkan label terlebih dahulu sebelum membuat artikel.", null);
+    return;
+  }
+
+  if (labels.length === 0) {
+    showRequiredError(statusMessage, "Label artikel wajib dipilih minimal satu.", null);
+    return;
+  }
+
   const contentFormat = getContentFormat();
-  const defaultLocale = postDefaultLocaleInput.value;
 
   submitButton.disabled = true;
   setMessage(
@@ -1443,7 +1548,7 @@ async function handlePostSubmit(event) {
   );
 
   try {
-    const coverImageUrl = coverImageUrlInput || editingPostCoverUrl;
+    const coverImageUrl = coverImageUrlInput;
     const imageName = deriveImageNameFromUrl(coverImageUrl, editingPostImageName);
 
     const payload = {
@@ -1486,25 +1591,45 @@ async function handleLabelSubmit(event) {
   }
 
   if (availableLocales.length === 0) {
-    setMessage(labelStatusMessage, "Tambahkan bahasa terlebih dahulu sebelum membuat label.", "error");
+    showRequiredError(labelStatusMessage, "Tambahkan bahasa terlebih dahulu sebelum membuat label.", null);
+    return;
+  }
+
+  const defaultLocale = labelDefaultLocaleInput.value;
+
+  if (!defaultLocale) {
+    showRequiredError(labelStatusMessage, "Default locale label wajib dipilih.", labelDefaultLocaleInput);
     return;
   }
 
   const namesResult = buildLabelNames();
 
   if (namesResult.error) {
-    setMessage(labelStatusMessage, namesResult.error, "error");
+    showRequiredError(
+      labelStatusMessage,
+      namesResult.error,
+      findEmptyField(labelLocaleFields, "input"),
+    );
     return;
   }
 
   const imageUrlInput = (labelImageInput.value || "").trim();
-  const defaultLocale = labelDefaultLocaleInput.value;
+
+  if (!imageUrlInput) {
+    showRequiredError(labelStatusMessage, "URL gambar label wajib diisi.", labelImageInput);
+    return;
+  }
+
+  if (!isValidHttpUrl(imageUrlInput)) {
+    showRequiredError(labelStatusMessage, "URL gambar label harus memakai format http atau https yang valid.", labelImageInput);
+    return;
+  }
 
   labelSubmitButton.disabled = true;
   setMessage(labelStatusMessage, editingLabelId ? "Menyimpan perubahan label..." : "Menyimpan label...", "info");
 
   try {
-    const imageUrl = imageUrlInput || editingLabelImageUrl;
+    const imageUrl = imageUrlInput;
     const imageName = deriveImageNameFromUrl(imageUrl, editingLabelImageName);
 
     const payload = {
@@ -1543,7 +1668,11 @@ async function handleAdmobSubmit(event) {
   const result = buildAdmobPayload();
 
   if (result.error) {
-    setMessage(admobStatusMessage, result.error, "error");
+    showRequiredError(
+      admobStatusMessage,
+      result.error,
+      findEmptyField(admobForm, "input[type='text'], input[type='number']"),
+    );
     return;
   }
 
@@ -1579,7 +1708,7 @@ async function handleSliderSubmit(event) {
   const result = buildHomeSliderPayload();
 
   if (result.error) {
-    setMessage(sliderStatusMessage, result.error, "error");
+    showRequiredError(sliderStatusMessage, result.error, sliderImageUrlsInput);
     return;
   }
 
@@ -1660,6 +1789,7 @@ function listenPosts() {
           return Object.assign({ id: item.id }, item.data());
         });
 
+        savedPosts = posts;
         renderPosts(posts);
       },
       function (error) {
@@ -1902,16 +2032,39 @@ function renderHomeSliderConfig(config) {
 
 function renderPosts(posts) {
   postList.innerHTML = "";
+  const totalPosts = posts.length;
+  const totalPages = Math.max(1, Math.ceil(totalPosts / postPageSize));
+  postCurrentPage = Math.min(Math.max(1, postCurrentPage), totalPages);
 
-  if (posts.length === 0) {
+  if (totalPosts === 0) {
     emptyState.textContent = "Belum ada artikel.";
     emptyState.classList.remove("hidden");
+    if (postPagination) {
+      postPagination.classList.add("hidden");
+    }
     return;
   }
 
   emptyState.classList.add("hidden");
+  if (postPagination) {
+    postPagination.classList.remove("hidden");
+  }
+  if (postPrevPageButton) {
+    postPrevPageButton.disabled = postCurrentPage <= 1;
+  }
+  if (postNextPageButton) {
+    postNextPageButton.disabled = postCurrentPage >= totalPages;
+  }
+  if (postPageInfo) {
+    const startNumber = (postCurrentPage - 1) * postPageSize + 1;
+    const endNumber = Math.min(postCurrentPage * postPageSize, totalPosts);
+    postPageInfo.textContent = `Halaman ${postCurrentPage} dari ${totalPages} (${startNumber}-${endNumber} dari ${totalPosts})`;
+  }
 
-  posts.forEach(function (post) {
+  const pageStart = (postCurrentPage - 1) * postPageSize;
+  const visiblePosts = posts.slice(pageStart, pageStart + postPageSize);
+
+  visiblePosts.forEach(function (post) {
     const article = document.createElement("article");
     article.className = "post-card";
     const contentFormat = post.contentFormat === "html" ? "html" : "text";
