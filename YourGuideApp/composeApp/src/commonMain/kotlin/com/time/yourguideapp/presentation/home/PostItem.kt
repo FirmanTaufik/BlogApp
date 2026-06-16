@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.helper.glassmorphism
+import com.time.yourguideapp.helper.htmlToPlainText
 import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.VerticalSpacer
@@ -49,7 +50,12 @@ fun PostItem(
     onToggleLove: () -> Unit = {},
 ) {
     val title = posts.getCurrentLocaleData().title
-    val description = posts.getCurrentLocaleData().content
+    val content = posts.getCurrentLocaleData().content
+    val description = if (posts.contentFormat.equals("html", ignoreCase = true)) {
+        htmlToPlainText(content)
+    } else {
+        content
+    }
     Row(
         modifier = modifier.fillMaxWidth()
             .padding(10.dp)

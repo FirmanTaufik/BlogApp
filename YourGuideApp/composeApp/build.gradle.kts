@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.ktor.client.android)
             implementation(libs.google.mobile.ads)
+            implementation(libs.jsoup)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
