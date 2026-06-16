@@ -23,6 +23,8 @@
           <button class="nav-tab active" type="button" data-view-target="content" aria-selected="true">Content</button>
           <button class="nav-tab" type="button" data-view-target="label" aria-selected="false">Label</button>
           <button class="nav-tab" type="button" data-view-target="locale" aria-selected="false">Locale Bahasa</button>
+          <button class="nav-tab" type="button" data-view-target="slider" aria-selected="false">Slider</button>
+          <button class="nav-tab" type="button" data-view-target="admob" aria-selected="false">AdMob</button>
         </nav>
 
         <section class="view-stack">
@@ -238,6 +240,148 @@
 
                 <div id="saved-locale-list" class="saved-locale-list"></div>
                 <p id="locale-empty-state" class="empty-state">Memuat bahasa...</p>
+              </section>
+            </div>
+          </section>
+
+          <section class="admin-view" data-view="admob" hidden>
+            <div class="view-grid view-grid-narrow">
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Konfigurasi AdMob</h2>
+                  <p>ID unit iklan disimpan ke Firestore document <code>settings/admob</code> dan dibaca oleh aplikasi mobile.</p>
+                </div>
+
+                <form id="admob-form" class="post-form">
+                  <div class="content-mode-group">
+                    <span class="field-label">Status iklan</span>
+                    <div class="toggle-grid">
+                      <label class="check-option">
+                        <input id="admob-enabled" type="checkbox" checked />
+                        <span>Aktifkan AdMob</span>
+                      </label>
+                      <label class="check-option">
+                        <input id="admob-show-banner" type="checkbox" checked />
+                        <span>Tampilkan banner</span>
+                      </label>
+                      <label class="check-option">
+                        <input id="admob-show-interstitial" type="checkbox" checked />
+                        <span>Tampilkan interstitial</span>
+                      </label>
+                      <label class="check-option">
+                        <input id="admob-show-app-open" type="checkbox" checked />
+                        <span>Tampilkan app open</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <label>
+                    <span>AdMob App ID Android</span>
+                    <input
+                      id="admob-app-id"
+                      type="text"
+                      placeholder="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"
+                    />
+                  </label>
+
+                  <label>
+                    <span>Banner ad unit ID</span>
+                    <input
+                      id="admob-banner-id"
+                      type="text"
+                      placeholder="ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy"
+                    />
+                  </label>
+
+                  <label>
+                    <span>Interstitial ad unit ID</span>
+                    <input
+                      id="admob-interstitial-id"
+                      type="text"
+                      placeholder="ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy"
+                    />
+                  </label>
+
+                  <label>
+                    <span>Interval klik interstitial</span>
+                    <input
+                      id="admob-interstitial-interval"
+                      type="number"
+                      min="1"
+                      step="1"
+                      placeholder="3"
+                    />
+                  </label>
+
+                  <label>
+                    <span>App open ad unit ID</span>
+                    <input
+                      id="admob-app-open-id"
+                      type="text"
+                      placeholder="ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy"
+                    />
+                  </label>
+
+                  <p class="field-hint">
+                    Catatan Android: App ID tetap harus ada di AndroidManifest saat app start. Field ini membantu admin menyimpan konfigurasi, sedangkan unit ID bisa dibaca dinamis dari Firestore.
+                  </p>
+                  <p id="admob-status-message" class="status"></p>
+
+                  <div class="form-actions">
+                    <button id="dummy-admob-button" class="secondary-button" type="button">Isi Test ID</button>
+                    <button id="admob-submit-button" type="submit">Simpan AdMob</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>AdMob Tersimpan</h2>
+                  <p>Preview konfigurasi aktif dari Firestore.</p>
+                </div>
+
+                <div id="saved-admob-config" class="settings-list"></div>
+                <p id="admob-empty-state" class="empty-state">Memuat konfigurasi AdMob...</p>
+              </section>
+            </div>
+          </section>
+
+          <section class="admin-view" data-view="slider" hidden>
+            <div class="view-grid view-grid-narrow">
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Home Banner Slider</h2>
+                  <p>URL gambar disimpan ke Firestore document <code>homeSlider/main</code> dan dipakai di banner home aplikasi mobile.</p>
+                </div>
+
+                <form id="slider-form" class="post-form">
+                  <label>
+                    <span>URL gambar slider</span>
+                    <textarea
+                      id="slider-image-urls"
+                      rows="8"
+                      placeholder="https://example.com/banner-1.jpg&#10;https://example.com/banner-2.jpg"
+                    ></textarea>
+                  </label>
+
+                  <p class="field-hint">Masukkan satu URL gambar per baris. Urutan baris akan menjadi urutan slider di aplikasi.</p>
+                  <p id="slider-status-message" class="status"></p>
+
+                  <div class="form-actions">
+                    <button id="dummy-slider-button" class="secondary-button" type="button">Isi Dummy</button>
+                    <button id="slider-submit-button" type="submit">Simpan Slider</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <h2>Preview Slider</h2>
+                  <p>Gambar aktif yang tersimpan di Firestore.</p>
+                </div>
+
+                <div id="saved-slider-list" class="slider-preview-list"></div>
+                <p id="slider-empty-state" class="empty-state">Memuat banner slider...</p>
               </section>
             </div>
           </section>

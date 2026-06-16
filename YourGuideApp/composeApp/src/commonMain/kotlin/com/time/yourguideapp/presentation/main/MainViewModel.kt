@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.time.yourguideapp.data.repository.MainRepository
 import com.time.yourguideapp.helper.AppManager
+import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.state.UIState
 import dev.gitlive.firebase.Firebase
@@ -40,16 +41,46 @@ class MainViewModel(
     }
 
     fun toggleBookmark(postId: String) {
+        if (postId.isBlank()) {
+            AppLogger.e(tag = "Bookmark") { "Cannot toggle bookmark: postId is blank" }
+            return
+        }
+
         val userId = currentUserId() ?: return
         val currentData = (_state.value as? UIState.Success<*>)?.data as? HomeData ?: return
+        val shouldRemove = currentData.bookmarkPostIds.contains(postId)
+        val previousBookmarkPostIds = currentData.bookmarkPostIds
+
+        updateBookmarkState(
+            if (shouldRemove) {
+                previousBookmarkPostIds.filterNot { it == postId }
+            } else {
+                (previousBookmarkPostIds + postId).distinct()
+            }
+        )
 
         viewModelScope.launch {
-            if (currentData.bookmarkPostIds.contains(postId)) {
-                repository.removeBookmark(userId, postId)
-            } else {
-                repository.addBookmark(userId, postId)
+            runCatching {
+                if (shouldRemove) {
+                    repository.removeBookmark(userId, postId)
+                } else {
+                    repository.addBookmark(userId, postId)
+                }
+            }.onFailure { error ->
+                updateBookmarkState(previousBookmarkPostIds)
+                AppLogger.e(tag = "Bookmark", throwable = error) {
+                    "Failed to ${if (shouldRemove) "remove" else "add"} bookmark for postId=$postId"
+                }
             }
         }
+    }
+
+    private fun updateBookmarkState(bookmarkPostIds: List<String>) {
+        val currentState = _state.value as? UIState.Success<*> ?: return
+        val currentData = currentState.data as? HomeData ?: return
+        _state.value = UIState.Success(
+            currentData.copy(bookmarkPostIds = bookmarkPostIds)
+        )
     }
 
     private fun currentUserId(): String? {

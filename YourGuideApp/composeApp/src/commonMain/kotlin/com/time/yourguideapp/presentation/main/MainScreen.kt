@@ -64,6 +64,7 @@ import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
+import com.time.yourguideapp.presentation.ads.AdMobBanner
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
 import com.time.yourguideapp.presentation.component.VerticalSpacer
@@ -90,8 +91,10 @@ data object MainScreen : Screen {
 
         val viewModel = LocalMainViewModel.current
         val state by viewModel.state.collectAsState()
-        val posts = ((state as? UIState.Success<*>)?.data as? HomeData)?.posts.orEmpty()
-        val labels = ((state as? UIState.Success<*>)?.data as? HomeData)?.labels.orEmpty()
+        val homeData = (state as? UIState.Success<*>)?.data as? HomeData
+        val posts = homeData?.posts.orEmpty()
+        val labels = homeData?.labels.orEmpty()
+        val adMobConfig = homeData?.adMobConfig
         val currentUser by Firebase.auth.authStateChanged.collectAsState(Firebase.auth.currentUser)
         val savedUserProfile = AppManager.currentUserProfile
 
@@ -116,6 +119,8 @@ data object MainScreen : Screen {
                 ?: savedUserProfile?.uuid.orEmpty(),
             userPhotoUrl = currentUser?.photoURL
                 ?: savedUserProfile?.photoUrl?.takeIf { it.isNotBlank() },
+            bannerAdUnitId = adMobConfig?.bannerAdUnitId.orEmpty(),
+            showBannerAd = adMobConfig?.canShowBanner == true,
         ) {
             CurrentTab()
         }
@@ -133,6 +138,8 @@ data object MainScreen : Screen {
         userName: String,
         userEmail: String,
         userPhotoUrl: String?,
+        bannerAdUnitId: String,
+        showBannerAd: Boolean,
         content: @Composable () -> Unit,
     ) {
 
@@ -237,9 +244,19 @@ data object MainScreen : Screen {
                         .fillMaxSize(),
                 ) {
                     content()
-                    Box(modifier = Modifier.wrapContentSize()
-                        .align(alignment = Alignment.BottomCenter),){
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(alignment = Alignment.BottomCenter),
+                    ) {
                         MainNavigationBar(tabs = tabs)
+                        if (showBannerAd) {
+                            AdMobBanner(
+                                modifier = Modifier.fillMaxWidth(),
+                                adUnitId = bannerAdUnitId,
+                            )
+                        }
                     }
                 }
             }
@@ -300,7 +317,7 @@ data object MainScreen : Screen {
             }
 
 
-            VerticalSpacer(50)
+            VerticalSpacer(20)
 
         }
     }
@@ -414,6 +431,8 @@ data object MainScreen : Screen {
                 userName = stringResource(Res.string.default_display_name),
                 userEmail = "traveler@example.com",
                 userPhotoUrl = null,
+                bannerAdUnitId = "",
+                showBannerAd = false,
             ) {
                 Text(stringResource(Res.string.nav_home))
             }

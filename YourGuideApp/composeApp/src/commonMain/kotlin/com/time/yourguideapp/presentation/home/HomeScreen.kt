@@ -77,8 +77,7 @@ fun HomeScreen(
                         contentPadding = PaddingValues(10.dp)
                     ) {
                         item{
-                            BannerSlider(listOf("https://picsum.photos/seed/blog-label-tech/512/512",
-                                "https://picsum.photos/seed/blog-label-tech/512/512","https://picsum.photos/seed/blog-label-tech/512/512","https://picsum.photos/seed/blog-label-tech/512/512"))
+                            BannerSlider(data.homeSliderConfig.images)
                             VerticalSpacer(20)
                         }
                         item {

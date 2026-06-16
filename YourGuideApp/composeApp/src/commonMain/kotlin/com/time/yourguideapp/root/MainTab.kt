@@ -14,7 +14,11 @@ import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -24,6 +28,7 @@ import org.jetbrains.compose.resources.stringResource
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
 import com.time.yourguideapp.presentation.category.CategoryScreen
+import com.time.yourguideapp.presentation.ads.AdMobInterstitialEffect
 import com.time.yourguideapp.presentation.detail.DetailScreen
 import com.time.yourguideapp.presentation.explore.ExploreScreen
 import com.time.yourguideapp.presentation.home.HomeData
@@ -33,6 +38,8 @@ import com.time.yourguideapp.presentation.love.PopularPlacesScreen
 import com.time.yourguideapp.presentation.currency.CurrencyScreen
 import com.time.yourguideapp.presentation.state.UIState
 import com.time.yourguideapp.presentation.weather.WeatherScreen
+import com.time.yourguideapp.model.Label
+import com.time.yourguideapp.model.Posts
 import yourguideapp.composeapp.generated.resources.*
 
 sealed class MainTab(
@@ -76,12 +83,51 @@ sealed class MainTab(
             val viewModel = LocalMainViewModel.current
             val rootNavigator = LocalRootNavigator.current
             val state by viewModel.state.collectAsState()
+            val homeData = (state as? UIState.Success<*>)?.data as? HomeData
+            val adMobConfig = homeData?.adMobConfig
+            var homeDetailClickCount by rememberSaveable { mutableIntStateOf(0) }
+            var interstitialRequestKey by rememberSaveable { mutableIntStateOf(0) }
+            var pendingDetail by remember { mutableStateOf<Pair<Posts, List<Label>>?>(null) }
+
+            fun openDetail(data: Posts, labels: List<Label>) {
+                rootNavigator.push(DetailScreen(data, labels))
+            }
+
+            AdMobInterstitialEffect(
+                adUnitId = adMobConfig?.interstitialAdUnitId.orEmpty(),
+                enabled = pendingDetail != null && adMobConfig?.canShowInterstitial == true,
+                requestKey = interstitialRequestKey,
+                onAdFinished = {
+                    val detail = pendingDetail ?: return@AdMobInterstitialEffect
+                    pendingDetail = null
+                    openDetail(detail.first, detail.second)
+                },
+            )
 
             HomeScreen(
                 state = state,
                 onReload = viewModel::refresh,
                 onOpenDetail = { data, lables ->
-                    rootNavigator.push(DetailScreen(data, lables))
+                    val interval = adMobConfig
+                        ?.interstitialInterval
+                        ?.takeIf { it > 0 }
+                        ?: 0
+                    val shouldGateWithInterstitial =
+                        adMobConfig?.canShowInterstitial == true && interval > 0
+
+                    if (!shouldGateWithInterstitial) {
+                        openDetail(data, lables)
+                    } else {
+                        val nextClickCount = homeDetailClickCount + 1
+                        homeDetailClickCount = nextClickCount
+
+                        if (nextClickCount % interval == 0) {
+                            pendingDetail = data to lables
+                            interstitialRequestKey += 1
+                        } else {
+                            openDetail(data, lables)
+                        }
+                    }
                 },
                 onOpenCategory = { label, list , listLabel->
 

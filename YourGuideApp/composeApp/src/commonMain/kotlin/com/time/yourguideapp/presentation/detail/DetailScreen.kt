@@ -70,7 +70,6 @@ import com.time.yourguideapp.helper.Dummy
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
-import com.time.yourguideapp.presentation.ads.ANDROID_BANNER_AD_UNIT_ID
 import com.time.yourguideapp.presentation.ads.AdMobBanner
 import com.time.yourguideapp.presentation.component.CustomItemBar
 import com.time.yourguideapp.presentation.component.HorizontalSpacer
@@ -90,6 +89,8 @@ data class DetailScreen(
         val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
             ?.bookmarkPostIds
             .orEmpty()
+        val adMobConfig = (((mainState as? UIState.Success<*>)?.data as? HomeData)
+            ?.adMobConfig)
         val sharePost = rememberShareAppLauncher()
 
         DetailContent(
@@ -97,6 +98,8 @@ data class DetailScreen(
             isLoved = bookmarkPostIds.contains(data.idPost),
             onBookmark = { mainViewModel.toggleBookmark(data.idPost) },
             onShare = { sharePost(data.shareMessage()) },
+            bannerAdUnitId = adMobConfig?.bannerAdUnitId.orEmpty(),
+            showBannerAd = adMobConfig?.canShowBanner == true,
         )
     }
 
@@ -108,6 +111,8 @@ data class DetailScreen(
         isLoved: Boolean,
         onBookmark: () -> Unit,
         onShare: () -> Unit,
+        bannerAdUnitId: String,
+        showBannerAd: Boolean,
     ) {
         val state = rememberScrollState()
 
@@ -204,10 +209,12 @@ data class DetailScreen(
 
 
                     }
-                    AdMobBanner(
-                        modifier = Modifier.fillMaxWidth(),
-                        adUnitId = ANDROID_BANNER_AD_UNIT_ID,
-                    )
+                    if (showBannerAd) {
+                        AdMobBanner(
+                            modifier = Modifier.fillMaxWidth(),
+                            adUnitId = bannerAdUnitId,
+                        )
+                    }
                 }
             }
         ) {

@@ -21,9 +21,12 @@ import com.time.yourguideapp.di.appModule
 import com.time.yourguideapp.di.platformModule
 import com.time.yourguideapp.helper.ProvideAppLanguage
 import com.time.yourguideapp.presentation.auth.AuthScreen
+import com.time.yourguideapp.presentation.ads.AppOpenAdEffect
+import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.HomeScreen
 import com.time.yourguideapp.presentation.login.LoginScreen
 import com.time.yourguideapp.presentation.main.MainViewModel
+import com.time.yourguideapp.presentation.state.UIState
 import com.time.yourguideapp.presentation.splash.SplashScreen
 import com.time.yourguideapp.root.RootScreen
 import dev.gitlive.firebase.Firebase
@@ -65,6 +68,14 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
                     SplashScreen()
                 }  else {
                     val viewModel = koinViewModel<MainViewModel>()
+                    val mainState by viewModel.state.collectAsState()
+                    val adMobConfig = ((mainState as? UIState.Success<*>)?.data as? HomeData)
+                        ?.adMobConfig
+
+                    AppOpenAdEffect(
+                        adUnitId = adMobConfig?.appOpenAdUnitId.orEmpty(),
+                        enabled = adMobConfig?.canShowAppOpen == true,
+                    )
 
                     CompositionLocalProvider(LocalMainViewModel provides viewModel) {
                         Navigator(screen = RootScreen) { navigator ->

@@ -22,15 +22,21 @@ class MainRepository(
             ?.let { firestoreService.observeUserBookmarkPostIds(it) }
             ?: flowOf(emptyList())
 
-        return combine(
+        val homeDataFlow = combine(
             firestoreService.getFeaturedGuide(),
             firestoreService.observeLabels(),
             firestoreService.getObserverLocales(),
             bookmarkIdsFlow,
-        ) { posts, labels, locales, bookmarkPostIds ->
-            UIState.Success(
-                    HomeData(labels = labels, posts, locales, bookmarkPostIds)
-                ) as UIState
+            firestoreService.observeAdMobConfig(),
+        ) { posts, labels, locales, bookmarkPostIds, adMobConfig ->
+            HomeData(labels = labels, posts, locales, bookmarkPostIds, adMobConfig)
+        }
+
+        return combine(
+            homeDataFlow,
+            firestoreService.observeHomeSliderConfig(),
+        ) { homeData, homeSliderConfig ->
+            UIState.Success(homeData.copy(homeSliderConfig = homeSliderConfig)) as UIState
         }.catch { error ->
                 emit(
                     UIState.Error(

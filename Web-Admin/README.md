@@ -46,6 +46,30 @@ Field yang disimpan:
 - `createdAt`
 - `updatedAt`
 
+Document: `settings/admob`
+
+Field yang disimpan:
+
+- `enabled`
+- `showBanner`
+- `showInterstitial`
+- `showAppOpen`
+- `appId`
+- `bannerAdUnitId`
+- `interstitialAdUnitId`
+- `interstitialInterval`
+- `appOpenAdUnitId`
+- `createdAt`
+- `updatedAt`
+
+Document: `homeSlider/main`
+
+Field yang disimpan:
+
+- `images`
+- `createdAt`
+- `updatedAt`
+
 ## Cara pakai
 
 1. Buka file `firebase-config.js`
@@ -106,6 +130,20 @@ Label akan disimpan seperti ini:
 - Form artikel bisa memilih lebih dari satu label
 - Setiap label bisa memiliki gambar sendiri lewat URL eksternal
 - Nama label akan menyesuaikan locale artikel saat ditampilkan
+
+## AdMob
+
+- Menu `AdMob` menyimpan konfigurasi ke document `settings/admob`
+- Aplikasi mobile membaca banner, interstitial, dan app open ad unit ID dari Firestore
+- `interstitialInterval` menentukan setiap berapa klik artikel dari home interstitial muncul sebelum detail dibuka
+- Gunakan tombol `Isi Test ID` untuk mengisi ID test Google AdMob saat development
+- Untuk Android, `appId` tetap harus cocok dengan meta-data `com.google.android.gms.ads.APPLICATION_ID` di AndroidManifest saat app dirilis
+
+## Home Banner Slider
+
+- Menu `Slider` menyimpan daftar URL gambar ke document `homeSlider/main`
+- Isi satu URL gambar per baris
+- Aplikasi mobile membaca field `images` dan menampilkannya di banner slider Home sesuai urutan input
 
 ## Konfigurasi Firebase
 

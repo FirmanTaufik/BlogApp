@@ -48,6 +48,30 @@ const labelSubmitButton = document.getElementById("label-submit-button");
 const savedLabelList = document.getElementById("saved-label-list");
 const labelEmptyState = document.getElementById("label-empty-state");
 
+const admobForm = document.getElementById("admob-form");
+const admobEnabledInput = document.getElementById("admob-enabled");
+const admobShowBannerInput = document.getElementById("admob-show-banner");
+const admobShowInterstitialInput = document.getElementById("admob-show-interstitial");
+const admobShowAppOpenInput = document.getElementById("admob-show-app-open");
+const admobAppIdInput = document.getElementById("admob-app-id");
+const admobBannerIdInput = document.getElementById("admob-banner-id");
+const admobInterstitialIdInput = document.getElementById("admob-interstitial-id");
+const admobInterstitialIntervalInput = document.getElementById("admob-interstitial-interval");
+const admobAppOpenIdInput = document.getElementById("admob-app-open-id");
+const admobStatusMessage = document.getElementById("admob-status-message");
+const dummyAdmobButton = document.getElementById("dummy-admob-button");
+const admobSubmitButton = document.getElementById("admob-submit-button");
+const savedAdmobConfig = document.getElementById("saved-admob-config");
+const admobEmptyState = document.getElementById("admob-empty-state");
+
+const sliderForm = document.getElementById("slider-form");
+const sliderImageUrlsInput = document.getElementById("slider-image-urls");
+const sliderStatusMessage = document.getElementById("slider-status-message");
+const dummySliderButton = document.getElementById("dummy-slider-button");
+const sliderSubmitButton = document.getElementById("slider-submit-button");
+const savedSliderList = document.getElementById("saved-slider-list");
+const sliderEmptyState = document.getElementById("slider-empty-state");
+
 const firebaseConfig = window.firebaseConfig || {};
 const appSettings = window.appSettings || {};
 const optionalFirebaseConfigKeys = ["storageBucket"];
@@ -81,6 +105,8 @@ let editingLabelId = null;
 let editingLabelImageUrl = "";
 let editingLabelImageName = "";
 let editingLocaleCode = null;
+let currentAdmobConfig = null;
+let currentHomeSliderConfig = null;
 
 if (missingConfig.length === 0 && window.firebase) {
   firebase.initializeApp(firebaseConfig);
@@ -96,6 +122,8 @@ labelImageInput.addEventListener("input", function () {
 postForm.addEventListener("submit", handlePostSubmit);
 labelForm.addEventListener("submit", handleLabelSubmit);
 localeForm.addEventListener("submit", handleLocaleSubmit);
+admobForm.addEventListener("submit", handleAdmobSubmit);
+sliderForm.addEventListener("submit", handleSliderSubmit);
 postDefaultLocaleInput.addEventListener("change", handlePostDefaultLocaleChange);
 cancelEditButton.addEventListener("click", cancelPostEdit);
 cancelLabelEditButton.addEventListener("click", cancelLabelEdit);
@@ -103,6 +131,8 @@ cancelLocaleEditButton.addEventListener("click", cancelLocaleEdit);
 dummyPostButton.addEventListener("click", fillDummyPostForm);
 dummyLabelButton.addEventListener("click", fillDummyLabelForm);
 dummyLocaleButton.addEventListener("click", fillDummyLocaleForm);
+dummyAdmobButton.addEventListener("click", fillDummyAdmobForm);
+dummySliderButton.addEventListener("click", fillDummySliderForm);
 contentFormatInputs.forEach(function (input) {
   input.addEventListener("change", updateContentFormatHint);
 });
@@ -116,10 +146,14 @@ if (db) {
   listenLocales();
   listenLabels();
   listenPosts();
+  listenAdmobConfig();
+  listenHomeSliderConfig();
 } else {
   emptyState.textContent = "Isi firebase-config.js untuk mulai memakai aplikasi.";
   labelEmptyState.textContent = "Isi firebase-config.js untuk mulai memakai aplikasi.";
   localeEmptyState.textContent = "Isi firebase-config.js untuk mulai memakai aplikasi.";
+  admobEmptyState.textContent = "Isi firebase-config.js untuk mulai memakai aplikasi.";
+  sliderEmptyState.textContent = "Isi firebase-config.js untuk mulai memakai aplikasi.";
 }
 
 updateContentFormatHint();
@@ -127,6 +161,8 @@ renderEmptyLocaleState();
 setActiveView("content");
 setLabelFormMode("create");
 setLocaleFormMode("create");
+renderAdmobConfig(null);
+renderHomeSliderConfig(null);
 
 function setActiveView(viewName) {
   navTabs.forEach(function (tab) {
@@ -167,6 +203,23 @@ function normalizeLocaleCode(value) {
 
 function isValidLocaleCode(value) {
   return /^[a-z]{2,3}(-[a-z0-9]{2,8})*$/.test(value);
+}
+
+function isValidAdMobAppId(value) {
+  return !value || /^ca-app-pub-\d{16}~\d{10}$/.test(value);
+}
+
+function isValidAdMobUnitId(value) {
+  return !value || /^ca-app-pub-\d{16}\/\d{10}$/.test(value);
+}
+
+function parseSliderImageUrls(value) {
+  return (value || "")
+    .split(/\r?\n/)
+    .map(function (url) {
+      return url.trim();
+    })
+    .filter(Boolean);
 }
 
 function escapeHtml(value) {
@@ -756,6 +809,117 @@ function fillDummyLabelForm() {
     "Dummy label terisi dengan gambar dari URL internet. Klik Simpan Label untuk menyimpan.",
     "info",
   );
+}
+
+function fillDummyAdmobForm() {
+  admobEnabledInput.checked = true;
+  admobShowBannerInput.checked = true;
+  admobShowInterstitialInput.checked = true;
+  admobShowAppOpenInput.checked = true;
+  admobAppIdInput.value = "ca-app-pub-3940256099942544~3347511713";
+  admobBannerIdInput.value = "ca-app-pub-3940256099942544/6300978111";
+  admobInterstitialIdInput.value = "ca-app-pub-3940256099942544/1033173712";
+  admobInterstitialIntervalInput.value = "3";
+  admobAppOpenIdInput.value = "ca-app-pub-3940256099942544/9257395921";
+  setMessage(admobStatusMessage, "Test ID AdMob terisi. Klik Simpan AdMob untuk menyimpan.", "info");
+}
+
+function fillDummySliderForm() {
+  sliderImageUrlsInput.value = [
+    "https://picsum.photos/seed/your-guide-banner-1/1200/630",
+    "https://picsum.photos/seed/your-guide-banner-2/1200/630",
+    "https://picsum.photos/seed/your-guide-banner-3/1200/630",
+  ].join("\n");
+  setMessage(sliderStatusMessage, "Dummy URL slider terisi. Klik Simpan Slider untuk menyimpan.", "info");
+}
+
+function applyHomeSliderConfigToForm(config) {
+  const images = config && Array.isArray(config.images) ? config.images : [];
+  sliderImageUrlsInput.value = images.join("\n");
+}
+
+function buildHomeSliderPayload() {
+  const images = parseSliderImageUrls(sliderImageUrlsInput.value);
+
+  if (images.length === 0) {
+    return { error: "Minimal isi satu URL gambar slider." };
+  }
+
+  const invalidUrl = images.find(function (url) {
+    try {
+      const parsedUrl = new URL(url);
+      return !["http:", "https:"].includes(parsedUrl.protocol);
+    } catch (_error) {
+      return true;
+    }
+  });
+
+  if (invalidUrl) {
+    return { error: `URL slider tidak valid: ${invalidUrl}` };
+  }
+
+  return {
+    payload: {
+      images: images,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+  };
+}
+
+function applyAdmobConfigToForm(config) {
+  const nextConfig = config || {};
+  admobEnabledInput.checked = nextConfig.enabled !== false;
+  admobShowBannerInput.checked = nextConfig.showBanner !== false;
+  admobShowInterstitialInput.checked = nextConfig.showInterstitial !== false;
+  admobShowAppOpenInput.checked = nextConfig.showAppOpen !== false;
+  admobAppIdInput.value = nextConfig.appId || "";
+  admobBannerIdInput.value = nextConfig.bannerAdUnitId || "";
+  admobInterstitialIdInput.value = nextConfig.interstitialAdUnitId || "";
+  admobInterstitialIntervalInput.value = nextConfig.interstitialInterval || 3;
+  admobAppOpenIdInput.value = nextConfig.appOpenAdUnitId || "";
+}
+
+function buildAdmobPayload() {
+  const appId = (admobAppIdInput.value || "").trim();
+  const bannerAdUnitId = (admobBannerIdInput.value || "").trim();
+  const interstitialAdUnitId = (admobInterstitialIdInput.value || "").trim();
+  const interstitialInterval = Number(admobInterstitialIntervalInput.value || 3);
+  const appOpenAdUnitId = (admobAppOpenIdInput.value || "").trim();
+
+  if (!isValidAdMobAppId(appId)) {
+    return { error: "Format AdMob App ID tidak valid. Contoh: ca-app-pub-3940256099942544~3347511713" };
+  }
+
+  if (!isValidAdMobUnitId(bannerAdUnitId)) {
+    return { error: "Format banner ad unit ID tidak valid. Contoh: ca-app-pub-3940256099942544/6300978111" };
+  }
+
+  if (!isValidAdMobUnitId(interstitialAdUnitId)) {
+    return { error: "Format interstitial ad unit ID tidak valid. Contoh: ca-app-pub-3940256099942544/1033173712" };
+  }
+
+  if (!Number.isInteger(interstitialInterval) || interstitialInterval < 1) {
+    return { error: "Interval klik interstitial wajib angka bulat minimal 1." };
+  }
+
+  if (!isValidAdMobUnitId(appOpenAdUnitId)) {
+    return { error: "Format app open ad unit ID tidak valid. Contoh: ca-app-pub-3940256099942544/9257395921" };
+  }
+
+  return {
+    payload: {
+      enabled: admobEnabledInput.checked,
+      showBanner: admobShowBannerInput.checked,
+      showInterstitial: admobShowInterstitialInput.checked,
+      showAppOpen: admobShowAppOpenInput.checked,
+      appId: appId,
+      bannerAdUnitId: bannerAdUnitId,
+      interstitialAdUnitId: interstitialAdUnitId,
+      interstitialInterval: interstitialInterval,
+      appOpenAdUnitId: appOpenAdUnitId,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+  };
 }
 
 async function fillDummyPostForm() {
@@ -1368,6 +1532,78 @@ async function handleLabelSubmit(event) {
   }
 }
 
+async function handleAdmobSubmit(event) {
+  event.preventDefault();
+
+  if (missingConfig.length > 0) {
+    setMessage(admobStatusMessage, "Firebase belum dikonfigurasi.", "error");
+    return;
+  }
+
+  const result = buildAdmobPayload();
+
+  if (result.error) {
+    setMessage(admobStatusMessage, result.error, "error");
+    return;
+  }
+
+  admobSubmitButton.disabled = true;
+  setMessage(admobStatusMessage, "Menyimpan konfigurasi AdMob...", "info");
+
+  try {
+    const docRef = db.collection(appSettings.settingsCollection || "settings").doc("admob");
+    const snapshot = await docRef.get();
+    const payload = result.payload;
+
+    if (!snapshot.exists) {
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    await docRef.set(payload, { merge: true });
+    setMessage(admobStatusMessage, "Konfigurasi AdMob berhasil disimpan.", "success");
+  } catch (error) {
+    setMessage(admobStatusMessage, error.message || "Gagal menyimpan konfigurasi AdMob.", "error");
+  } finally {
+    admobSubmitButton.disabled = false;
+  }
+}
+
+async function handleSliderSubmit(event) {
+  event.preventDefault();
+
+  if (missingConfig.length > 0) {
+    setMessage(sliderStatusMessage, "Firebase belum dikonfigurasi.", "error");
+    return;
+  }
+
+  const result = buildHomeSliderPayload();
+
+  if (result.error) {
+    setMessage(sliderStatusMessage, result.error, "error");
+    return;
+  }
+
+  sliderSubmitButton.disabled = true;
+  setMessage(sliderStatusMessage, "Menyimpan banner slider...", "info");
+
+  try {
+    const docRef = db.collection("homeSlider").doc("main");
+    const snapshot = await docRef.get();
+    const payload = result.payload;
+
+    if (!snapshot.exists) {
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    await docRef.set(payload, { merge: true });
+    setMessage(sliderStatusMessage, "Banner slider berhasil disimpan.", "success");
+  } catch (error) {
+    setMessage(sliderStatusMessage, error.message || "Gagal menyimpan banner slider.", "error");
+  } finally {
+    sliderSubmitButton.disabled = false;
+  }
+}
+
 function listenLocales() {
   db.collection(appSettings.localesCollection)
     .orderBy("name", "asc")
@@ -1428,6 +1664,36 @@ function listenPosts() {
       },
       function (error) {
         emptyState.textContent = `Gagal membaca Firestore: ${error.message}`;
+      },
+    );
+}
+
+function listenAdmobConfig() {
+  db.collection(appSettings.settingsCollection || "settings")
+    .doc("admob")
+    .onSnapshot(
+      function (snapshot) {
+        currentAdmobConfig = snapshot.exists ? snapshot.data() : null;
+        applyAdmobConfigToForm(currentAdmobConfig);
+        renderAdmobConfig(currentAdmobConfig);
+      },
+      function (error) {
+        admobEmptyState.textContent = `Gagal membaca konfigurasi AdMob: ${error.message}`;
+      },
+    );
+}
+
+function listenHomeSliderConfig() {
+  db.collection("homeSlider")
+    .doc("main")
+    .onSnapshot(
+      function (snapshot) {
+        currentHomeSliderConfig = snapshot.exists ? snapshot.data() : null;
+        applyHomeSliderConfigToForm(currentHomeSliderConfig);
+        renderHomeSliderConfig(currentHomeSliderConfig);
+      },
+      function (error) {
+        sliderEmptyState.textContent = `Gagal membaca banner slider: ${error.message}`;
       },
     );
 }
@@ -1553,6 +1819,84 @@ function renderSavedLabels() {
     });
 
     savedLabelList.appendChild(article);
+  });
+}
+
+function renderAdmobConfig(config) {
+  savedAdmobConfig.innerHTML = "";
+
+  if (!config) {
+    admobEmptyState.textContent = "Belum ada konfigurasi AdMob.";
+    admobEmptyState.classList.remove("hidden");
+    return;
+  }
+
+  admobEmptyState.classList.add("hidden");
+
+  const statusBadges = [
+    config.enabled !== false ? "AdMob aktif" : "AdMob nonaktif",
+    config.showBanner !== false ? "Banner aktif" : "Banner nonaktif",
+    config.showInterstitial !== false ? "Interstitial aktif" : "Interstitial nonaktif",
+    config.showAppOpen !== false ? "App open aktif" : "App open nonaktif",
+  ]
+    .map(function (label) {
+      return `<span class="mini-badge">${escapeHtml(label)}</span>`;
+    })
+    .join("");
+
+  const article = document.createElement("article");
+  article.className = "settings-card";
+  article.innerHTML = `
+    <div class="mini-badge-row">${statusBadges}</div>
+    <div class="settings-row">
+      <strong>App ID</strong>
+      <code>${escapeHtml(config.appId || "-")}</code>
+    </div>
+    <div class="settings-row">
+      <strong>Banner ad unit ID</strong>
+      <code>${escapeHtml(config.bannerAdUnitId || "-")}</code>
+    </div>
+    <div class="settings-row">
+      <strong>Interstitial ad unit ID</strong>
+      <code>${escapeHtml(config.interstitialAdUnitId || "-")}</code>
+    </div>
+    <div class="settings-row">
+      <strong>Interval klik interstitial</strong>
+      <code>${escapeHtml(config.interstitialInterval || 3)}</code>
+    </div>
+    <div class="settings-row">
+      <strong>App open ad unit ID</strong>
+      <code>${escapeHtml(config.appOpenAdUnitId || "-")}</code>
+    </div>
+    <span class="post-date">Update: ${escapeHtml(formatDate(config.updatedAt))}</span>
+  `;
+
+  savedAdmobConfig.appendChild(article);
+}
+
+function renderHomeSliderConfig(config) {
+  savedSliderList.innerHTML = "";
+  const images = config && Array.isArray(config.images) ? config.images : [];
+
+  if (images.length === 0) {
+    sliderEmptyState.textContent = "Belum ada gambar slider.";
+    sliderEmptyState.classList.remove("hidden");
+    return;
+  }
+
+  sliderEmptyState.classList.add("hidden");
+
+  images.forEach(function (imageUrl, index) {
+    const article = document.createElement("article");
+    article.className = "slider-preview-card";
+    article.innerHTML = `
+      <img src="${escapeHtml(imageUrl)}" alt="Banner slider ${index + 1}" />
+      <div class="slider-preview-copy">
+        <span class="mini-badge">Slide ${index + 1}</span>
+        <code>${escapeHtml(imageUrl)}</code>
+      </div>
+    `;
+    savedSliderList.appendChild(article);
   });
 }
 

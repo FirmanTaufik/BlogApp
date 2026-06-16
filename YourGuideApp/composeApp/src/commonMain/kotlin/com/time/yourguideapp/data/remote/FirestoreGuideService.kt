@@ -1,7 +1,9 @@
 package com.time.yourguideapp.data.remote
 
+import com.time.yourguideapp.model.AdMobConfig
 import com.time.yourguideapp.model.Bookmark
 import com.time.yourguideapp.model.GuideDocument
+import com.time.yourguideapp.model.HomeSliderConfig
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Locales
 import com.time.yourguideapp.model.Posts
@@ -47,6 +49,30 @@ class FirestoreGuideService {
                             idLocales = document.id
                         )
                 }
+            }
+    }
+
+    fun observeAdMobConfig(): Flow<AdMobConfig> {
+        return Firebase.firestore
+            .collection("settings")
+            .document("admob")
+            .snapshots
+            .map { snapshot ->
+                runCatching {
+                    snapshot.data(AdMobConfig.serializer())
+                }.getOrDefault(AdMobConfig())
+            }
+    }
+
+    fun observeHomeSliderConfig(): Flow<HomeSliderConfig> {
+        return Firebase.firestore
+            .collection("homeSlider")
+            .document("main")
+            .snapshots
+            .map { snapshot ->
+                runCatching {
+                    snapshot.data(HomeSliderConfig.serializer())
+                }.getOrDefault(HomeSliderConfig())
             }
     }
 

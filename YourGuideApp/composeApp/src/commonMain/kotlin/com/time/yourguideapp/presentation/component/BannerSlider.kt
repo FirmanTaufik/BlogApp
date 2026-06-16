@@ -7,7 +7,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
@@ -40,28 +42,37 @@ import kotlin.math.absoluteValue
 fun BannerSlider(
     images: List<String>
 ) {
-    if (images.isEmpty()) return
+    val validImages = images.map { it.trim() }.filter { it.isNotBlank() }
+    if (validImages.isEmpty()) return
 
     val pagerState = rememberPagerState {
-        images.size
+        validImages.size
     }
 
-    LaunchedEffect(pagerState, images.size) {
-        if (images.size <= 1) return@LaunchedEffect
+    LaunchedEffect(pagerState, validImages.size) {
+        if (validImages.size <= 1) return@LaunchedEffect
 
         while (true) {
             delay(3_500)
-            val nextPage = (pagerState.currentPage + 1) % images.size
+            val nextPage = (pagerState.currentPage + 1) % validImages.size
             pagerState.animateScrollToPage(nextPage)
         }
     }
 
+    val shape = RoundedCornerShape(18.dp)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .padding(horizontal = 6.dp)
+            .aspectRatio(1.92f)
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.55f))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.72f),
+                shape = shape,
+            )
     ) {
         HorizontalPager(
             state = pagerState,
@@ -83,7 +94,7 @@ fun BannerSlider(
                     .alpha(1f - (pageOffset.coerceIn(0f, 1f) * 0.25f))
             ) {
                 AsyncImage(
-                    model = images[page],
+                    model = validImages[page],
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -96,7 +107,21 @@ fun BannerSlider(
                             Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = 0.35f)
+                                    Color.Black.copy(alpha = 0.10f),
+                                    Color.Black.copy(alpha = 0.48f)
+                                )
+                            )
+                        )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.18f),
+                                    Color.Transparent,
                                 )
                             )
                         )
@@ -105,11 +130,11 @@ fun BannerSlider(
         }
 
         BannerIndicator(
-            pageCount = images.size,
+            pageCount = validImages.size,
             currentPage = pagerState.currentPage,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 14.dp)
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 14.dp)
         )
     }
 }
@@ -123,7 +148,10 @@ private fun BoxScope.BannerIndicator(
     if (pageCount <= 1) return
 
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(Color.Black.copy(alpha = 0.22f))
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

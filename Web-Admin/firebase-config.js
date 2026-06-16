@@ -11,4 +11,5 @@ window.appSettings = {
   firestoreCollection: "posts",
   labelsCollection: "labels",
   localesCollection: "locales",
+  settingsCollection: "settings",
 };

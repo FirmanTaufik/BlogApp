@@ -52,3 +52,54 @@ Contoh isi:
   ]
 }
 ```
+
+## Konfigurasi AdMob dari Firestore
+
+Web admin menyimpan konfigurasi AdMob di:
+
+Collection:
+`settings`
+
+Document:
+`admob`
+
+Contoh isi development:
+
+```json
+{
+  "enabled": true,
+  "showBanner": true,
+  "showInterstitial": true,
+  "showAppOpen": true,
+  "appId": "ca-app-pub-3940256099942544~3347511713",
+  "bannerAdUnitId": "ca-app-pub-3940256099942544/6300978111",
+  "interstitialAdUnitId": "ca-app-pub-3940256099942544/1033173712",
+  "interstitialInterval": 3,
+  "appOpenAdUnitId": "ca-app-pub-3940256099942544/9257395921"
+}
+```
+
+Catatan Android:
+AdMob app ID tetap wajib ada di `AndroidManifest.xml` melalui meta-data `com.google.android.gms.ads.APPLICATION_ID`. Unit ID banner, interstitial, dan app open dibaca dinamis dari Firestore.
+
+## Konfigurasi Home Slider dari Firestore
+
+Web admin menyimpan banner slider home di root collection:
+
+Collection:
+`homeSlider`
+
+Document:
+`main`
+
+Contoh isi:
+
+```json
+{
+  "images": [
+    "https://picsum.photos/seed/your-guide-banner-1/1200/630",
+    "https://picsum.photos/seed/your-guide-banner-2/1200/630",
+    "https://picsum.photos/seed/your-guide-banner-3/1200/630"
+  ]
+}
+```
