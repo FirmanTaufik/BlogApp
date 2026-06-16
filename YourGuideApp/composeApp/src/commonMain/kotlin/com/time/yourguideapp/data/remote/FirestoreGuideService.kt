@@ -21,6 +21,8 @@ class FirestoreGuideService {
                 it.documents.map { doc ->
                     doc.data(Posts.serializer())
                         .copy(idPost = doc.id)
+                }.sortedByDescending { post ->
+                    post.createdAt.ifBlank { post.updatedAt }
                 }
             }
     }
