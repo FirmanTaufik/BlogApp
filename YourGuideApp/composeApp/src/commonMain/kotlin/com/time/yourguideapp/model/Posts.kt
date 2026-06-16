@@ -14,8 +14,7 @@ data class Posts (
     val labelIds : List<String>,
     val updatedAt: String,
     val views: String,
-    val locales : Locales
-
+    val locales : Locales,
 ){
 
     fun getCurrentLocaleData(): Locales.LocalesData {

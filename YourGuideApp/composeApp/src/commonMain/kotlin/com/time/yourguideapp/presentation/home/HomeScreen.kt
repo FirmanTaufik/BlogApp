@@ -121,8 +121,9 @@ fun HomeScreen(
 
 
                         itemsIndexed(data.posts){ index, item ->
-                            val label = data.labels.find { it.idLabel == item.labelIds.first()  }?.getCurrentLanguage() ?: ""
-                            AppLogger.d (tag = "HomeTAG"){ "Ini Label $label ${item.labelIds.first()} ${data.labels.size}" }
+                            val labelId = item.labelIds.firstOrNull()
+                            val label = data.labels.find { it.idLabel == labelId }?.getCurrentLanguage() ?: ""
+                            AppLogger.d (tag = "HomeTAG"){ "Ini Label $label ${labelId.orEmpty()} ${data.labels.size}" }
                             PostItem(item, label, Modifier.fillMaxWidth()
                                 .padding(vertical = 10.dp)
                                 .clickable{

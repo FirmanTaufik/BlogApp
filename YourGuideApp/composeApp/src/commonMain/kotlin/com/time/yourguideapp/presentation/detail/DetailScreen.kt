@@ -65,6 +65,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.LocalMainViewModel
+import com.time.yourguideapp.core.platform.rememberShareAppLauncher
 import com.time.yourguideapp.helper.Dummy
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.model.Label
@@ -89,12 +90,13 @@ data class DetailScreen(
         val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
             ?.bookmarkPostIds
             .orEmpty()
+        val sharePost = rememberShareAppLauncher()
 
         DetailContent(
             onBack = { navigator.pop() },
             isLoved = bookmarkPostIds.contains(data.idPost),
             onBookmark = { mainViewModel.toggleBookmark(data.idPost) },
-            onShare = {},
+            onShare = { sharePost(data.shareMessage()) },
         )
     }
 
@@ -129,7 +131,7 @@ data class DetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBackIosNew,
-                                contentDescription = null,
+                                contentDescription = "Back",
                                 tint = AppColors.blue123060,
                             )
                         }
@@ -149,7 +151,7 @@ data class DetailScreen(
                                 } else {
                                     Icons.Outlined.FavoriteBorder
                                 },
-                                contentDescription = null,
+                                contentDescription = if (isLoved) "Remove bookmark" else "Add bookmark",
                                 tint = if (isLoved) Color(0xFFE94B6A) else AppColors.blue123060,
                             )
                         }
@@ -163,7 +165,7 @@ data class DetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = null,
+                                contentDescription = "Share",
                                 tint = AppColors.blue123060,
                             )
                         }
@@ -287,13 +289,24 @@ data class DetailScreen(
                             lineHeight = 30.sp,
                             modifier = Modifier.padding(15.dp)
                         )
-                        Text(
-                            text = data.getCurrentLocaleData().content,
-                            color = AppColors.blue123060,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            modifier = Modifier.padding(horizontal = 15.dp)
-                        )
+                        val content = data.getCurrentLocaleData().content
+                        if (data.contentFormat.equals("html", ignoreCase = true)) {
+                            HtmlContent(
+                                html = content,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 240.dp)
+                                    .padding(horizontal = 15.dp),
+                            )
+                        } else {
+                            Text(
+                                text = content,
+                                color = AppColors.blue123060,
+                                fontSize = 13.sp,
+                                lineHeight = 14.sp,
+                                modifier = Modifier.padding(horizontal = 15.dp)
+                            )
+                        }
                         VerticalSpacer(32)
                     }
                 }
@@ -303,6 +316,34 @@ data class DetailScreen(
 
 
     }
+}
+
+private fun Posts.shareMessage(): String {
+    val localeData = getCurrentLocaleData()
+    val summary = if (contentFormat.equals("html", ignoreCase = true)) {
+        localeData.content.stripHtmlTags()
+    } else {
+        localeData.content
+    }.collapseWhitespace()
+
+    return buildString {
+        append(localeData.title)
+        if (summary.isNotBlank()) {
+            append("\n\n")
+            append(summary.take(220))
+            if (summary.length > 220) {
+                append("...")
+            }
+        }
+    }
+}
+
+private fun String.stripHtmlTags(): String {
+    return replace(Regex("<[^>]*>"), " ")
+}
+
+private fun String.collapseWhitespace(): String {
+    return replace(Regex("\\s+"), " ").trim()
 }
 
 
