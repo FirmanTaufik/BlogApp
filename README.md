@@ -1,5 +1,9 @@
 # BlogApp
 
+How to run : 
+
+Video Tutorial https://youtu.be/867mc9wAzB8
+
 Repository ini berisi dua project:
 
 - `Web-Admin`: panel admin berbasis HTML, CSS, dan JavaScript untuk mengelola konten Firestore.
