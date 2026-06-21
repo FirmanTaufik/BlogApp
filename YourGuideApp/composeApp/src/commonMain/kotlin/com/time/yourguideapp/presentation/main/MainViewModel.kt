@@ -21,6 +21,7 @@ class MainViewModel(
     private val _state = MutableStateFlow<UIState>(UIState.Loading)
     val state = _state.asStateFlow()
     private var observeJob: Job? = null
+    private var homeDetailClickCount = 0
 
     init {
         loadContent()
@@ -35,9 +36,25 @@ class MainViewModel(
         observeJob = viewModelScope.launch {
             _state.value = UIState.Loading
             repository.observeHomeState(currentUserId()).collect { state ->
+                val data  = (state  as? UIState.Success<*>)?.data
+                val adMobConfig =( data as HomeData).adMobConfig
+                homeDetailClickCount = adMobConfig.interstitialInterval
                 _state.value = state
             }
         }
+    }
+
+    fun shouldShowHomeDetailInterstitial(interval: Int): Boolean {
+        if (interval <= 0) {
+            homeDetailClickCount = 0
+            return false
+        }
+
+        homeDetailClickCount += 1
+        if (homeDetailClickCount < interval) return false
+
+        homeDetailClickCount = 0
+        return true
     }
 
     fun toggleBookmark(postId: String) {

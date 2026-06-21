@@ -85,7 +85,6 @@ sealed class MainTab(
             val state by viewModel.state.collectAsState()
             val homeData = (state as? UIState.Success<*>)?.data as? HomeData
             val adMobConfig = homeData?.adMobConfig
-            var homeDetailClickCount by rememberSaveable { mutableIntStateOf(0) }
             var interstitialRequestKey by rememberSaveable { mutableIntStateOf(0) }
             var pendingDetail by remember { mutableStateOf<Pair<Posts, List<Label>>?>(null) }
 
@@ -112,21 +111,16 @@ sealed class MainTab(
                         ?.interstitialInterval
                         ?.takeIf { it > 0 }
                         ?: 0
-                    val shouldGateWithInterstitial =
+                    val shouldShowInterstitial =
                         adMobConfig?.canShowInterstitial == true && interval > 0
 
-                    if (!shouldGateWithInterstitial) {
+                    if (!shouldShowInterstitial) {
                         openDetail(data, lables)
+                    } else if (viewModel.shouldShowHomeDetailInterstitial(interval)) {
+                        pendingDetail = data to lables
+                        interstitialRequestKey += 1
                     } else {
-                        val nextClickCount = homeDetailClickCount + 1
-                        homeDetailClickCount = nextClickCount
-
-                        if (nextClickCount % interval == 0) {
-                            pendingDetail = data to lables
-                            interstitialRequestKey += 1
-                        } else {
-                            openDetail(data, lables)
-                        }
+                        openDetail(data, lables)
                     }
                 },
                 onOpenCategory = { label, list , listLabel->

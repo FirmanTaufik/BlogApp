@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -178,7 +179,9 @@ data class DetailScreen(
                 )
             },
             bottomBar = {
-                Column {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()) {
                     /*BottomAppBar(containerColor = Color.Transparent,) {
                         Row (modifier = Modifier.fillMaxWidth()
                             .padding(horizontal = 15.dp),
@@ -218,7 +221,9 @@ data class DetailScreen(
                 }
             }
         ) {
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()
+             //   .padding(it)
+            ) {
                 val viewportHeight = maxHeight
 
                 AsyncImage(

@@ -23,6 +23,7 @@ actual fun AdMobInterstitialEffect(
     val context = LocalContext.current
 
     LaunchedEffect(adUnitId, enabled, requestKey) {
+        Log.d("AdMobInterstitial", "AdMobInterstitialEffect: $adUnitId $enabled $requestKey")
         if (!enabled || adUnitId.isBlank() || requestKey <= 0) {
             return@LaunchedEffect
         }
