@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -23,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +34,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import com.time.yourguideapp.AppColors
 import com.time.yourguideapp.helper.AppManager
 import com.time.yourguideapp.LocalMainViewModel
-import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
 import com.time.yourguideapp.model.AdMobConfig
@@ -40,26 +41,33 @@ import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
 import com.time.yourguideapp.presentation.ads.AdMobBanner
 import com.time.yourguideapp.presentation.ads.AdMobInterstitialEffect
+import com.time.yourguideapp.presentation.detail.DetailScreen
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.PostItem
+import com.time.yourguideapp.presentation.main.MainViewModel
 import com.time.yourguideapp.presentation.state.UIState
 import org.jetbrains.compose.resources.stringResource
 import yourguideapp.composeapp.generated.resources.*
 import org.koin.compose.viewmodel.koinViewModel
 
-class CategoryScreen(val label : Label, val data : List<Posts>,
-                     val listLabel: List<Label>,
-                     val adMobConfig: AdMobConfig,
-                     val  onClickBack :() -> Unit,
-    val onOpenDetail : (Posts, List<Label>)-> Unit) : Screen {
+class CategoryScreen(
+    val label: Label, val data: List<Posts>,
+    val listLabel: List<Label>,
+    val adMobConfig: AdMobConfig,
+    val mainVM: MainViewModel,
+    var interstitialRequestKey: Int,
+    val onClickBack: () -> Unit,
+    val onOpenDetail: (Posts, List<Label>) -> Unit
+) : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val viewModel = koinViewModel<CategoryViewModel>()
-        val mainViewModel = LocalMainViewModel.current
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        val mainState by mainViewModel.state.collectAsState()
+        val mainState by mainVM.state.collectAsState()
+        var pendingDetail by remember { mutableStateOf<Pair<Posts, List<Label>>?>(null) }
+
         val bookmarkPostIds = ((mainState as? UIState.Success<*>)?.data as? HomeData)
             ?.bookmarkPostIds
             .orEmpty()
@@ -68,6 +76,22 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
         LaunchedEffect(Unit){
             viewModel.getListByLabel(label, data)
         }
+
+
+        fun openDetail(data: Posts, labels: List<Label>) {
+            onOpenDetail(data, labels)
+        }
+
+        AdMobInterstitialEffect(
+            adUnitId = adMobConfig?.interstitialAdUnitId.orEmpty(),
+            enabled = pendingDetail != null && adMobConfig?.canShowInterstitial == true,
+            requestKey = interstitialRequestKey,
+            onAdFinished = {
+                val detail = pendingDetail ?: return@AdMobInterstitialEffect
+                pendingDetail = null
+                openDetail(detail.first, detail.second)
+            },
+        )
 
         Scaffold(modifier = Modifier.fillMaxSize()
             .rootBackground(),
@@ -116,10 +140,25 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
                                     PostItem(item, labelName, Modifier.fillMaxWidth()
                                         .padding(vertical = 10.dp)
                                         .clickable{
-                                            onOpenDetail(item, listLabel)
+                                            val interval = adMobConfig
+                                                ?.interstitialInterval
+                                                ?.takeIf { it > 0 }
+                                                ?: 0
+                                            val shouldShowInterstitial =
+                                                adMobConfig?.canShowInterstitial == true && interval > 0
+
+                                            if (!shouldShowInterstitial) {
+                                                onOpenDetail(item, listLabel)
+                                            } else if (mainVM.shouldShowHomeDetailInterstitial(interval)) {
+                                                pendingDetail = item to listLabel
+                                                interstitialRequestKey += 1
+                                            } else {
+                                                onOpenDetail(item, listLabel)
+                                            }
+
                                         },
                                         isLoved = bookmarkPostIds.contains(item.idPost),
-                                        onToggleLove = { mainViewModel.toggleBookmark(item.idPost) },
+                                        onToggleLove = { mainVM.toggleBookmark(item.idPost) },
                                     )
                                 }
                             }

@@ -1,9 +1,5 @@
 package com.time.yourguideapp.root
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
@@ -19,8 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
@@ -129,6 +123,8 @@ sealed class MainTab(
                     rootNavigator.push(CategoryScreen(label, list,
                         listLabel ,
                         adMobConfig ?: AdMobConfig(),
+                        viewModel,
+                        interstitialRequestKey ,
                         onClickBack = {
                         rootNavigator.pop()
 
@@ -190,6 +186,7 @@ sealed class MainTab(
             LoveScreen(
                 lovedPosts = lovedPosts,
                 labels = labels,
+                viewModel,
                 rootNavigator = rootNavigator,
                 onToggleLove = { post ->
                     viewModel.toggleBookmark(post.idPost)
