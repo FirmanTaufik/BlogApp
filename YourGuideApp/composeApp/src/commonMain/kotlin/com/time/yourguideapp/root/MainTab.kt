@@ -27,6 +27,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import org.jetbrains.compose.resources.stringResource
 import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.LocalRootNavigator
+import com.time.yourguideapp.model.AdMobConfig
 import com.time.yourguideapp.presentation.category.CategoryScreen
 import com.time.yourguideapp.presentation.ads.AdMobInterstitialEffect
 import com.time.yourguideapp.presentation.detail.DetailScreen
@@ -127,11 +128,12 @@ sealed class MainTab(
 
                     rootNavigator.push(CategoryScreen(label, list,
                         listLabel ,
+                        adMobConfig ?: AdMobConfig(),
                         onClickBack = {
                         rootNavigator.pop()
 
                     }, onOpenDetail = { data, labels ->
-                        rootNavigator.push(DetailScreen(data, labels))
+                        openDetail(data, labels)
                     }))
                 },
                 onToggleLove = { post ->

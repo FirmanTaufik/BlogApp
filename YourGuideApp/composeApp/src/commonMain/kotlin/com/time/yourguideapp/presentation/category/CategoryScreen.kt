@@ -2,9 +2,11 @@ package com.time.yourguideapp.presentation.category
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -33,8 +35,11 @@ import com.time.yourguideapp.LocalMainViewModel
 import com.time.yourguideapp.helper.AppLogger
 import com.time.yourguideapp.helper.glassmorphism
 import com.time.yourguideapp.helper.rootBackground
+import com.time.yourguideapp.model.AdMobConfig
 import com.time.yourguideapp.model.Label
 import com.time.yourguideapp.model.Posts
+import com.time.yourguideapp.presentation.ads.AdMobBanner
+import com.time.yourguideapp.presentation.ads.AdMobInterstitialEffect
 import com.time.yourguideapp.presentation.home.HomeData
 import com.time.yourguideapp.presentation.home.PostItem
 import com.time.yourguideapp.presentation.state.UIState
@@ -44,6 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 class CategoryScreen(val label : Label, val data : List<Posts>,
                      val listLabel: List<Label>,
+                     val adMobConfig: AdMobConfig,
                      val  onClickBack :() -> Unit,
     val onOpenDetail : (Posts, List<Label>)-> Unit) : Screen {
 
@@ -62,6 +68,7 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
         LaunchedEffect(Unit){
             viewModel.getListByLabel(label, data)
         }
+
         Scaffold(modifier = Modifier.fillMaxSize()
             .rootBackground(),
             containerColor = Color.Transparent,
@@ -94,35 +101,47 @@ class CategoryScreen(val label : Label, val data : List<Posts>,
                 )
             }) {
 
-            Box(modifier = Modifier.fillMaxSize().padding(it),
-                contentAlignment = Alignment.Center){
-                when (uiState){
-                    is UIState.Success<*> -> {
-                        val listPostByLabel = ((uiState as UIState.Success<*>).data as List<Posts>)
-                            .filter { post -> post.hasLocaleContent(currentLanguage) }
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            itemsIndexed(listPostByLabel){ index, item ->
-                                val labelName = label.getCurrentLanguage()
-                                PostItem(item, labelName, Modifier.fillMaxWidth()
-                                    .padding(vertical = 10.dp)
-                                    .clickable{
-                                        onOpenDetail(item, listLabel)
-                                    },
-                                    isLoved = bookmarkPostIds.contains(item.idPost),
-                                    onToggleLove = { mainViewModel.toggleBookmark(item.idPost) },
-                                )
+            Column {
+                Box(modifier = Modifier.weight(1f)
+                    .fillMaxWidth()
+                    .padding(it),
+                    contentAlignment = Alignment.Center){
+                    when (uiState){
+                        is UIState.Success<*> -> {
+                            val listPostByLabel = ((uiState as UIState.Success<*>).data as List<Posts>)
+                                .filter { post -> post.hasLocaleContent(currentLanguage) }
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                itemsIndexed(listPostByLabel){ index, item ->
+                                    val labelName = label.getCurrentLanguage()
+                                    PostItem(item, labelName, Modifier.fillMaxWidth()
+                                        .padding(vertical = 10.dp)
+                                        .clickable{
+                                            onOpenDetail(item, listLabel)
+                                        },
+                                        isLoved = bookmarkPostIds.contains(item.idPost),
+                                        onToggleLove = { mainViewModel.toggleBookmark(item.idPost) },
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    is UIState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-                    else -> {
-                        Text(stringResource(Res.string.category_error))
+                        is UIState.Loading -> {
+                            CircularProgressIndicator()
+                        }
+                        else -> {
+                            Text(stringResource(Res.string.category_error))
+                        }
                     }
                 }
+                if (adMobConfig.enabled) {
+                    AdMobBanner(
+                        modifier = Modifier.fillMaxWidth(),
+                        adUnitId = adMobConfig.bannerAdUnitId,
+                    )
+                }
             }
+
+
 
 
 
