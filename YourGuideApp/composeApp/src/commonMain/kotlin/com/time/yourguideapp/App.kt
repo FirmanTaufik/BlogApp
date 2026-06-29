@@ -17,6 +17,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.mmk.kmpauth.core.KMPAuthInternalApi
 import com.mmk.kmpauth.core.logger.KMPAuthLogger
 import com.mmk.kmpauth.core.logger.currentLogger
+import com.time.yourguideapp.data.repository.PopularPlacesRepository
 import com.time.yourguideapp.di.appModule
 import com.time.yourguideapp.di.platformModule
 import com.time.yourguideapp.helper.ProvideAppLanguage
@@ -31,8 +32,11 @@ import com.time.yourguideapp.presentation.splash.SplashScreen
 import com.time.yourguideapp.root.RootScreen
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import org.koin.compose.KoinApplication
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.KoinApplication
 import org.koin.dsl.KoinAppDeclaration
@@ -58,9 +62,18 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
         ProvideAppLanguage {
             MaterialTheme {
                 var showSplash by remember { mutableStateOf(true) }
+                val popularPlacesRepository = koinInject<PopularPlacesRepository>()
 
                 LaunchedEffect(Unit) {
-                    delay(2200)
+                    coroutineScope {
+                        val minimumSplashDuration = async { delay(2200) }
+                        val popularPlacesPreload = async {
+                            popularPlacesRepository.loadPopularPlaces()
+                        }
+
+                        minimumSplashDuration.await()
+                        popularPlacesPreload.await()
+                    }
                     showSplash = false
                 }
 

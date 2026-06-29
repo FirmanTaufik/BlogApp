@@ -11,21 +11,33 @@ import kotlinx.coroutines.launch
 class PopularPlacesViewModel(
     private val repository: PopularPlacesRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(PopularPlacesUiState(isLoading = true))
+    private val initialPlaces = repository.getCachedPopularPlaces().orEmpty()
+    private val _uiState = MutableStateFlow(
+        PopularPlacesUiState(
+            places = initialPlaces,
+            isLoading = initialPlaces.isEmpty(),
+        ),
+    )
     val uiState = _uiState.asStateFlow()
 
     init {
-        refresh()
+        if (initialPlaces.isEmpty()) {
+            loadPlaces(forceRefresh = false)
+        }
     }
 
     fun refresh() {
+        loadPlaces(forceRefresh = true)
+    }
+
+    private fun loadPlaces(forceRefresh: Boolean) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(isLoading = true, errorMessage = null)
             }
 
             runCatching {
-                repository.loadPopularPlaces()
+                repository.loadPopularPlaces(forceRefresh = forceRefresh)
             }.fold(
                 onSuccess = { places ->
                     _uiState.update {

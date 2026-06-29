@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -125,8 +126,10 @@ class CategoryScreen(
                 )
             }) {
 
-            Column {
-                Box(modifier = Modifier.weight(1f)
+            Column( Modifier
+                .fillMaxSize()) {
+                Box(modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
                     .padding(it),
                     contentAlignment = Alignment.Center){
@@ -174,7 +177,8 @@ class CategoryScreen(
                 }
                 if (adMobConfig.enabled) {
                     AdMobBanner(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .navigationBarsPadding(),
                         adUnitId = adMobConfig.bannerAdUnitId,
                     )
                 }

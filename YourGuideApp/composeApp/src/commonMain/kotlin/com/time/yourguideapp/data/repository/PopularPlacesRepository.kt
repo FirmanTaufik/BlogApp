@@ -9,30 +9,64 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class PopularPlacesRepository(
     private val client: HttpClient,
 ) {
-    suspend fun loadPopularPlaces(): List<PopularPlace> {
+    private val cacheMutex = Mutex()
+    private var cachedPlaces: List<PopularPlace>? = null
+
+    fun getCachedPopularPlaces(): List<PopularPlace>? = cachedPlaces
+
+    suspend fun loadPopularPlaces(forceRefresh: Boolean = false): List<PopularPlace> {
+        if (!forceRefresh) {
+            cachedPlaces?.let { return it }
+        }
+
+        return cacheMutex.withLock {
+            if (!forceRefresh) {
+                cachedPlaces?.let { return@withLock it }
+            }
+
+            fetchPopularPlaces().also { places ->
+                cachedPlaces = places
+            }
+        }
+    }
+
+    private suspend fun fetchPopularPlaces(): List<PopularPlace> {
         val apiPlaces = popularPlaceQueries
             .flatMap { query ->
                 runCatching { searchPlaces(query) }.getOrDefault(emptyList())
             }
-            .distinctBy { place -> place.title.lowercase() }
+            .distinctBy { place -> place.continent to place.title.lowercase() }
             .filter { place -> place.title.isUsefulPlaceTitle() }
+            .groupBy { place -> place.continent }
+            .let { placesByContinent ->
+                PopularPlaceContinent.entries.flatMap { continent ->
+                    placesByContinent[continent]
+                        .orEmpty()
+                        .sortedBy { place -> place.title }
+                        .take(30)
+                }
+            }
+
+        val populatedContinents = apiPlaces.mapTo(mutableSetOf()) { place -> place.continent }
+        val fallbackPlaces = popularPlaceSeeds
+            .filter { seed -> seed.continent !in populatedContinents }
+            .map { seed ->
+                runCatching { loadPlace(seed) }
+                    .getOrElse { seed.toFallbackPlace() }
+            }
+
+        return (apiPlaces + fallbackPlaces)
             .sortedWith(compareBy<PopularPlace> { it.continent.ordinal }.thenBy { it.title })
-            .take(180)
-
-        if (apiPlaces.isNotEmpty()) {
-            return apiPlaces
-        }
-
-        return popularPlaceSeeds.mapNotNull { seed ->
-            runCatching { loadPlace(seed) }.getOrNull()
-        }
     }
 
     private suspend fun searchPlaces(query: PopularPlaceQuery): List<PopularPlace> {
+        print("loadPopularPlaces $query")
         val response = client.get(
             "https://en.wikipedia.org/w/rest.php/v1/search/page?q=${query.text.queryValue()}&limit=30",
         ) {
@@ -90,6 +124,15 @@ class PopularPlacesRepository(
         )
     }
 }
+
+private fun PopularPlaceSeed.toFallbackPlace() = PopularPlace(
+    title = pageTitle.replace("_", " "),
+    location = fallbackLocation,
+    description = "Popular destination in $fallbackLocation",
+    imageUrl = "",
+    sourceUrl = "https://en.wikipedia.org/wiki/$pageTitle",
+    continent = continent,
+)
 
 private data class PopularPlaceQuery(
     val text: String,

@@ -92,7 +92,7 @@ fun PopularPlacesScreen(
 
         when {
             uiState.isLoading -> {
-                items(3) {
+                items(10) {
                     PopularPlaceLoadingCard()
                 }
             }
